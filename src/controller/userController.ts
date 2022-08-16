@@ -28,7 +28,7 @@ export default class UserController extends BaseController {
         password: hashedPassword,
       });
     } catch (err) {
-      return res.status(400).json({ msg: CREATED_USER_FAILED });
+      return res.status(400).json({ status: CREATED_USER_FAILED });
     }
 
     const payload = {

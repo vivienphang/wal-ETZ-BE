@@ -70,7 +70,13 @@ const userSchema: Schema<UsersAttributes> = new Schema<UsersAttributes>(
       trim: true,
       match: /.+@.+\..+/,
     },
-    username: { type: String, required: true },
+    username: {
+      type: String,
+      lowercase: true,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     password: { type: String, required: true },
     profilePicture: { type: String },
     defaultCurrency: {
