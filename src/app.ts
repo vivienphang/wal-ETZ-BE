@@ -13,7 +13,10 @@ const app: express.Application = express();
 const PORT: number | string = process.env.PORT || 3030;
 
 const userController: UserController = new UserController(userModel);
-const userRoutes = new UserRoutes(userController, "middleware tba").routes();
+const userRoutes: express.Router = new UserRoutes(
+  userController,
+  "middleware tba"
+).routes();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
