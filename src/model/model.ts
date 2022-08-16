@@ -1,7 +1,8 @@
 import { Model, model, Schema } from "mongoose";
-import { AccountsAttributes } from "../types/accountsSchema";
+import { AccountsAttributes } from "../types/accountsInterface";
 import { FriendAttributes } from "../types/friendInterface";
 import { RecordsAttributes } from "../types/recordsInterface";
+import { UsersAttributes } from "../types/userInterface";
 
 const friendsSchema: Schema<FriendAttributes> = new Schema<FriendAttributes>({
   username: { type: String },
@@ -59,7 +60,7 @@ const accountsSchema: Schema<AccountsAttributes> =
     { timestamps: true }
   );
 
-const userSchema: Schema = new Schema(
+const userSchema: Schema<UsersAttributes> = new Schema<UsersAttributes>(
   {
     email: {
       type: String,
@@ -69,8 +70,8 @@ const userSchema: Schema = new Schema(
       trim: true,
       match: /.+@.+\..+/,
     },
-    username: { type: String },
-    password: { type: String },
+    username: { type: String, required: true },
+    password: { type: String, required: true },
     profilePicture: { type: String },
     defaultCurrency: {
       type: String,
@@ -97,7 +98,7 @@ const userSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export const userModel = model("user", userSchema);
+export const userModel: Model<UsersAttributes> = model("user", userSchema);
 export const accountsModel: Model<AccountsAttributes> = model(
   "accounts",
   accountsSchema
