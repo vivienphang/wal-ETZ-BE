@@ -12,6 +12,7 @@
   "plugins": ["@typescript-eslint"],
   "rules": {
     "no-console": "off",
+    "object-curly-newline": "off",
     "quotes": "off",
     "comma-dangle": "off",
     "operator-linebreak": "off",

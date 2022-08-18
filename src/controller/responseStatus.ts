@@ -2,6 +2,7 @@ const responseStatus = {
   BAD_CONNECTION: "error in connecting to db",
   CREATED_USER: "user successfully created",
   CREATED_USER_FAILED: "can't create user",
+  JWT_REFRESHED: "JWT successfully refreshed",
   LOGGED_IN: "Log in successful",
   NOT_FOUND: "can't find data",
   USER_NOT_FOUND: "user not found",
