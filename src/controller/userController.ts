@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
 import { JWTRequest } from "../types/jwtRequestInterface";
+import { JwtPayload } from "../types/jwtPayload";
 
 const {
   CREATED_USER,
@@ -34,11 +35,11 @@ export default class UserController extends BaseController {
       return res.status(400).json({ status: CREATED_USER_FAILED });
     }
 
-    const payload = {
+    const payload: JwtPayload = {
       id: newUser.id,
     };
     console.log("payload: ", payload);
-    const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+    const token: string = jwt.sign(payload, process.env.JWT_SECRET as string, {
       expiresIn: process.env.JWT_EXP,
     });
     return res
@@ -62,7 +63,7 @@ export default class UserController extends BaseController {
     const dbPassword: string = checkUser.password as string;
     const passwordCheck: boolean = await bcrypt.compare(password, dbPassword);
     if (passwordCheck) {
-      const payload = {
+      const payload: JwtPayload = {
         id: checkUser.id,
       };
       console.log("payload: ", payload);
@@ -71,7 +72,7 @@ export default class UserController extends BaseController {
       });
       return res
         .status(200)
-        .json({ status: LOGGED_IN, username: checkUser.id, token });
+        .json({ status: LOGGED_IN, id: checkUser.id, token });
     }
     return res.status(400).json({ status: PASSWORD_MISMATCH });
   }
@@ -81,7 +82,7 @@ export default class UserController extends BaseController {
     console.log("checking if jwt is present");
     console.log(this.model);
     const { id } = req.body;
-    const payload = {
+    const payload: JwtPayload = {
       id,
     };
     console.log("payload: ", payload);
