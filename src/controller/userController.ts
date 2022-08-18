@@ -3,16 +3,19 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
+import { JWTRequest } from "../types/jwtRequestInterface";
 
 const {
   CREATED_USER,
   CREATED_USER_FAILED,
-  USER_NOT_FOUND,
+  JWT_REFRESHED,
   LOGGED_IN,
+  USER_NOT_FOUND,
   PASSWORD_MISMATCH,
 } = responseStatus;
 
 export default class UserController extends BaseController {
+  /* non jwt routes */
   async signUp(req: Request, res: Response) {
     console.log("signing up new user");
     const { username, email, password } = req.body;
@@ -33,8 +36,6 @@ export default class UserController extends BaseController {
 
     const payload = {
       id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
     };
     console.log("payload: ", payload);
     const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
@@ -42,7 +43,7 @@ export default class UserController extends BaseController {
     });
     return res
       .status(200)
-      .json({ status: CREATED_USER, username: newUser.username, token });
+      .json({ status: CREATED_USER, id: newUser.id, token });
   }
 
   async logIn(req: Request, res: Response) {
@@ -59,12 +60,10 @@ export default class UserController extends BaseController {
     }
 
     const dbPassword: string = checkUser.password as string;
-    const passwordCheck = await bcrypt.compare(password, dbPassword);
+    const passwordCheck: boolean = await bcrypt.compare(password, dbPassword);
     if (passwordCheck) {
       const payload = {
         id: checkUser.id,
-        username: checkUser.username,
-        email: checkUser.email,
       };
       console.log("payload: ", payload);
       const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
@@ -72,8 +71,23 @@ export default class UserController extends BaseController {
       });
       return res
         .status(200)
-        .json({ status: LOGGED_IN, username: checkUser.username, token });
+        .json({ status: LOGGED_IN, username: checkUser.id, token });
     }
     return res.status(400).json({ status: PASSWORD_MISMATCH });
+  }
+
+  /* jwt routes */
+  JWTRefresh(req: JWTRequest, res: Response) {
+    console.log("checking if jwt is present");
+    console.log(this.model);
+    const { id } = req.body;
+    const payload = {
+      id,
+    };
+    console.log("payload: ", payload);
+    const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+      expiresIn: process.env.JWT_EXP,
+    });
+    res.status(200).json({ message: JWT_REFRESHED, id, token });
   }
 }
