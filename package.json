@@ -24,12 +24,18 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.12",
     "@types/jsonwebtoken": "^8.5.8",
+    "@types/passport": "^1.0.10",
+    "@types/passport-google-oauth20": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
     "eslint": "^8.21.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "nodemon": "^2.0.19"
+    "express-session": "^1.17.3",
+    "nodemon": "^2.0.19",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0"
   }
 }

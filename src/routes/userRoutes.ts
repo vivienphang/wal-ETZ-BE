@@ -13,6 +13,7 @@ export default class UsersRoutes extends BaseRoutes {
     router.use(this.authMiddleware);
     router.get("/loginCheck", this.controller.loginCheck.bind(this.controller));
     */
+
     return router;
   }
 }
