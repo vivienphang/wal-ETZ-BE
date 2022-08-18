@@ -1,10 +1,13 @@
+import { RequestHandler } from "express";
+import UserController from "../controller/userController";
+
 export default class BaseRoutes {
-  public controller: any;
+  public controller: UserController;
 
-  public authMiddleware: any;
+  public JWTMiddleware: RequestHandler;
 
-  constructor(controller: any, authMiddleware: any) {
+  constructor(controller: UserController, JWTMiddleware: RequestHandler) {
     this.controller = controller;
-    this.authMiddleware = authMiddleware;
+    this.JWTMiddleware = JWTMiddleware;
   }
 }
