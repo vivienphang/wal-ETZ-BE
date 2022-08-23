@@ -8,7 +8,7 @@ import { JwtPayload } from "../types/jwtPayload";
 
 const {
   CREATED_USER,
-  CREATED_USER_FAILED,
+  CREATE_USER_FAILED,
   JWT_REFRESHED,
   LOGGED_IN,
   USER_NOT_FOUND,
@@ -32,13 +32,13 @@ export default class UserController extends BaseController {
         password: hashedPassword,
       });
     } catch (err) {
-      return res.status(400).json({ status: CREATED_USER_FAILED });
+      return res.status(400).json({ status: CREATE_USER_FAILED });
     }
 
     const payload: JwtPayload = {
       id: newUser.id,
     };
-    console.log("payload: ", payload);
+
     const token: string = jwt.sign(payload, process.env.JWT_SECRET as string, {
       expiresIn: process.env.JWT_EXP,
     });
@@ -66,7 +66,7 @@ export default class UserController extends BaseController {
       const payload: JwtPayload = {
         id: checkUser.id,
       };
-      console.log("payload: ", payload);
+
       const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
         expiresIn: process.env.JWT_EXP,
       });
@@ -85,7 +85,7 @@ export default class UserController extends BaseController {
     const payload: JwtPayload = {
       id,
     };
-    console.log("payload: ", payload);
+
     const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
       expiresIn: process.env.JWT_EXP,
     });
