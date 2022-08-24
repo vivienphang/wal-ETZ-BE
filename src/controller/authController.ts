@@ -1,16 +1,33 @@
-// import { Request, response, Response } from "express";
-// import BaseController from "./baseController";
+/* eslint-disable class-methods-use-this */
+import { Request, Response } from "express";
+import passport from "passport";
+import mongoose from "mongoose";
+import BaseController from "./baseController";
 
-// export default class UserController extends BaseController {
-//   try {
-//     const loginFailed = (req: Request, res: Response) => {
-//       // if
-//       res.status(401).json({
-//         success: false,
-//         onmessage: "failure",
-//       });
-//     }
-// } catch (err) {
-//   response
-// }
-// }
+export default class AuthController extends BaseController {
+  async loginFailed(_req: Request, res: Response) {
+    // if
+    console.log("running login failed");
+    res.status(401).json({
+      success: false,
+      onmessage: "failure",
+    });
+  }
+
+  async googleAuth(_req: Request, _res: Response) {
+    console.log("running google auth");
+    passport.authenticate("google", { scope: ["profile"] });
+  }
+
+  async googleAuthSuccess(_req: Request, _res: Response) {
+    console.log("running google callback successful");
+    passport.authenticate("google", {
+      // successRedirect: process.env.FRONTEND_URL,
+      failureRedirect: "/" | undefined,
+    }),
+      (req: Request, res: Response) => {
+        // successful authentication, redirect to home
+        res.redirect("/");
+      };
+  }
+}

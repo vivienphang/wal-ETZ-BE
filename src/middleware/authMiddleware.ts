@@ -2,7 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import jwt from "jsonwebtoken";
 import responseStatus from "./responseStatus";
 
-const { BAD_JWT, EXPIRED_JWT } = responseStatus;
+const { BAD_JWT, EXPIRED_JWT, NO_JWT } = responseStatus;
 
 const authenticateJWT: RequestHandler =
   () => async (req: Request, res: Response, next: NextFunction) => {
@@ -11,6 +11,9 @@ const authenticateJWT: RequestHandler =
       const authToken: string | undefined = req
         .header("Authorization")
         ?.replace("Bearer", "");
+      if (!authToken) {
+        return res.status(401).json({ message: NO_JWT });
+      }
       const verifiedToken: string | jwt.JwtPayload = jwt.verify(
         authToken as string,
         process.env.JWT_SECRET as string

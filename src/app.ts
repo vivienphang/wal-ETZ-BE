@@ -4,22 +4,26 @@ import passport from "passport";
 import cors from "cors";
 import session from "express-session";
 import connectDB from "./config/config";
-import { userModel } from "./model/model";
+import { userModel, accountsModel, recordsModel } from "./model/model";
+import AccountsController from "./controller/accountsController";
 import UserController from "./controller/userController";
 import UserRoutes from "./routes/userRoutes";
 import authenticateJWT from "./middleware/authMiddleware";
+import AccountsRoutes from "./routes/accountsRoutes";
+import initPassport from "./authentication/initPassport";
+import AuthRoutes from "./routes/authRoutes";
+import AuthController from "./controller/authController";
+
+require("dotenv").config();
 connectDB();
 
 const app: express.Application = express();
 const PORT: number | string = (process.env.PORT as string) || 3030;
 
 // authentication setup
-import initPassport from "./authentication/initPassport";
-import AuthRoutes from "./routes/authRoutes";
-import AuthController from "./controller/authController";
 app.use(
   session({
-    secret: "helloWorld",
+    secret: "secretcode",
     resave: false,
     saveUninitialized: true,
   })
@@ -38,6 +42,17 @@ const authRoutes: express.Router = new AuthRoutes(
   authenticateJWT
 ).routes();
 
+const accountsController: AccountsController = new AccountsController(
+  accountsModel,
+  recordsModel,
+  userModel
+);
+const accountsRoutes: express.Router = new AccountsRoutes(
+  accountsController,
+
+  authenticateJWT
+).routes();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -52,11 +67,8 @@ passport.authenticate("google");
 
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
+app.use("/accounts", accountsRoutes);
 
 app.listen(PORT, () => {
   console.log(`app is listening at port ${PORT}`);
 });
-
-function cb(err: any, user: any) {
-  throw new Error("Function not implemented.");
-}

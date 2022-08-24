@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import findOrCreate from "mongoose-find-or-create";
-import { userModel } from "./..model/model";
+import { userModel } from "../model/model";
+import passport from "passport";
 
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
-require("dotenv").config();
-require("./passport");
+require("./initPassport");
 
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 
@@ -32,7 +32,7 @@ module.exports = (passport: any) => {
         // using mongoose-find-or-create package
         const userResult = await userModel.findOrCreate(
           { googleId: profile.id },
-          (err: any, userModel: any) => {
+          (err: any, _userModel: any) => {
             done(err, profile);
           }
         );
