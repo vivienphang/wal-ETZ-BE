@@ -2,6 +2,7 @@ import { Schema } from "mongoose";
 import { FriendAttributes } from "./friendInterface";
 
 export interface UsersAttributes {
+  googleID?: string;
   email: string;
   username: string;
   password: string;
