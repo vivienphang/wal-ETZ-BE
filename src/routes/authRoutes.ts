@@ -15,10 +15,13 @@ export default class AuthRoutes extends BaseRoutes {
     //     onmessage: "failure",
     //   });
     // });
-    router.get("/google", this.controller.googleAuth.bind(this.controller));
+    router.get(
+      "/google",
 
-    //   passport.authenticate("google", { scope: ["profile"] })
-    // );
+      // this.controller.googleAuth.bind(this.controller));
+
+      passport.authenticate("google", { scope: ["profile"] })
+    );
     router.get(
       "/google/callback",
       passport.authenticate("google", {

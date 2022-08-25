@@ -25,7 +25,8 @@ export default class AuthController extends BaseController {
       // successRedirect: process.env.FRONTEND_URL,
       failureRedirect: "/" | undefined,
     }),
-      (req: Request, res: Response) => {
+      (_req: Request, res: Response) => {
+        console.log("google callback: successful response");
         // successful authentication, redirect to home
         res.redirect("/");
       };
