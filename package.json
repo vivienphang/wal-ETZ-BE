@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "nodemon ./dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
+    "seed": "node ./dist/seeder.js"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "typescript": "^4.7.4"
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.4.0",
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.12",
