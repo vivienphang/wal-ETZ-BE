@@ -62,6 +62,9 @@ const accountsSchema: Schema<AccountsAttributes> =
 
 const userSchema: Schema<UsersAttributes> = new Schema<UsersAttributes>(
   {
+    googleID: {
+      type: String,
+    },
     email: {
       type: String,
       lowercase: true,
