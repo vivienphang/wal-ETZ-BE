@@ -15,6 +15,7 @@ import AuthRoutes from "./routes/authRoutes";
 import AuthController from "./controller/authController";
 
 require("dotenv").config();
+
 connectDB();
 
 const app: express.Application = express();
@@ -59,7 +60,7 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: process.env.FRONTEND_URL as string,
+    origin: process.env.FRONTEND_URL,
   })
 );
 

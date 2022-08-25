@@ -14,9 +14,9 @@ export default class AuthController extends BaseController {
     });
   }
 
-  async googleAuth(_req: Request, _res: Response) {
+  async googleAuth(_req: Request, res: Response) {
     console.log("running google auth");
-    passport.authenticate("google", { scope: ["profile"] });
+    res.send(passport.authenticate("google", { scope: ["profile"] }));
   }
 
   async googleAuthSuccess(_req: Request, _res: Response) {
