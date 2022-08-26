@@ -15,20 +15,24 @@ export default class AuthRoutes extends BaseRoutes {
     //     onmessage: "failure",
     //   });
     // });
-    router.get("/google", this.controller.googleAuth.bind(this.controller));
+    router.get(
+      "/google",
 
-    //   passport.authenticate("google", { scope: ["profile"] })
-    // );
+      //   this.controller.googleAuth.bind(this.controller)
+      // );
+
+      passport.authenticate("google", { scope: ["profile", "email"] })
+    );
     router.get(
       "/google/callback",
       passport.authenticate("google", {
         // successRedirect: process.env.FRONTEND_URL,
-        failureRedirect: "/",
+        failureRedirect: `${process.env.FRONTEND_URL}/login`,
       }),
       // eslint-disable-next-line prefer-arrow-callback,
       (req: Request, res: Response) => {
         // successful authentication, redirect to home
-        res.redirect("/dashboard");
+        res.redirect(process.env.FRONTEND_URL as string);
       }
     );
 

@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
-import findOrCreate from "mongoose-find-or-create";
+// import findOrCreate from "mongoose-find-or-create";
 import { userModel } from "../model/model";
-import passport from "passport";
 
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
@@ -14,7 +12,7 @@ const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 //   credentials (in this case, a token, tokenSecret, and Google profile), and
 //   invoke a callback with a user object.
 
-module.exports = (passport: any) => {
+const googleStrategy = (passport: any) => {
   passport.use(
     new GoogleStrategy(
       {
@@ -23,21 +21,42 @@ module.exports = (passport: any) => {
         callbackURL: "/auth/google/callback",
       },
       async (
-        _accessToken: any,
+        accessToken: any,
         _refreshToken: any,
-        profile: { id: any },
+        profile: {
+          id: String;
+          displayName: String;
+          photos: any;
+          emails: any;
+        },
         done: any
       ) => {
         console.log("this is profile:", profile);
+        console.log("this is access token:", accessToken);
         // using mongoose-find-or-create package
-        const userResult = await userModel.findOrCreate(
-          { googleId: profile.id },
-          (err: any, _userModel: any) => {
+        let userResult;
+        try {
+          userResult = await userModel.findOne({ googleID: profile.id });
+        } catch (err) {
+          done(err, profile);
+        }
+        if (!userResult) {
+          try {
+            userResult = await userModel.create({
+              googleID: profile.id,
+              username: profile.displayName,
+              email: profile.emails[0].value,
+              profilePicture: profile.photos[0].value,
+            });
+          } catch (err) {
             done(err, profile);
           }
-        );
+        }
         console.log("this is user result:", userResult);
+        done(null, profile);
       }
     )
   );
 };
+
+module.exports = googleStrategy;
