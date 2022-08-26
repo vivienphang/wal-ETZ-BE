@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-import-module-exports
 import passport from "passport";
+// import googleStrategy from "./googleStrategy";
 
 const initPassport = (app: any) => {
   app.use(passport.initialize());
@@ -11,8 +12,7 @@ const initPassport = (app: any) => {
 
   passport.deserializeUser((userModel, done) => done(null, userModel));
 
-  // eslint-disable-next-line global-require
   require("./googleStrategy")(passport);
 };
 
-module.exports = initPassport;
+export default initPassport;

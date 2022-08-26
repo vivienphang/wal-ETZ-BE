@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "nodemon ./dist/app.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "seed": "node ./dist/seeder.js"
   },
   "keywords": [],
@@ -35,6 +35,7 @@
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.12",
+    "@types/express-session": "^1.17.5",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/passport-google-oauth20": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^5.33.0",

@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
-import findOrCreate from "mongoose-find-or-create";
+// import findOrCreate from "mongoose-find-or-create";
 import { userModel } from "../model/model";
-import passport from "passport";
 
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
@@ -14,7 +12,7 @@ const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 //   credentials (in this case, a token, tokenSecret, and Google profile), and
 //   invoke a callback with a user object.
 
-module.exports = (passport: any) => {
+const googleStrategy = (passport: any) => {
   passport.use(
     new GoogleStrategy(
       {
@@ -30,14 +28,17 @@ module.exports = (passport: any) => {
       ) => {
         console.log("this is profile:", profile);
         // using mongoose-find-or-create package
-        const userResult = await userModel.findOrCreate(
-          { googleId: profile.id },
-          (err: any, _userModel: any) => {
-            done(err, profile);
-          }
+        const userResult = await userModel.findOne(
+          { googleId: profile.id }
+
+          // (err: any, userModel: any) => {
+          //   done(err, profile);
+          // }
         );
         console.log("this is user result:", userResult);
       }
     )
   );
 };
+
+module.exports = googleStrategy;
