@@ -12,6 +12,7 @@ const initPassport = (app: any) => {
 
   passport.deserializeUser((userModel, done) => done(null, userModel));
 
+  // eslint-disable-next-line global-require
   require("./googleStrategy")(passport);
 };
 

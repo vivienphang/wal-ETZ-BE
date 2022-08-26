@@ -21,21 +21,39 @@ const googleStrategy = (passport: any) => {
         callbackURL: "/auth/google/callback",
       },
       async (
-        _accessToken: any,
+        accessToken: any,
         _refreshToken: any,
-        profile: { id: any },
+        profile: {
+          id: String;
+          displayName: String;
+          photos: any;
+          emails: any;
+        },
         done: any
       ) => {
         console.log("this is profile:", profile);
+        console.log("this is access token:", accessToken);
         // using mongoose-find-or-create package
-        const userResult = await userModel.findOne(
-          { googleId: profile.id }
-
-          // (err: any, userModel: any) => {
-          //   done(err, profile);
-          // }
-        );
+        let userResult;
+        try {
+          userResult = await userModel.findOne({ googleID: profile.id });
+        } catch (err) {
+          done(err, profile);
+        }
+        if (!userResult) {
+          try {
+            userResult = await userModel.create({
+              googleID: profile.id,
+              username: profile.displayName,
+              email: profile.emails[0].value,
+              profilePicture: profile.photos[0].value,
+            });
+          } catch (err) {
+            done(err, profile);
+          }
+        }
         console.log("this is user result:", userResult);
+        done(null, profile);
       }
     )
   );
