@@ -5,6 +5,7 @@ import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
 import { JWTRequest } from "../types/jwtRequestInterface";
 import { JwtPayload } from "../types/jwtPayload";
+import { UsersAttributes } from "../types/userInterface";
 
 const {
   CREATED_USER,
@@ -13,6 +14,8 @@ const {
   LOGGED_IN,
   USER_NOT_FOUND,
   PASSWORD_MISMATCH,
+  POPULATE_FAIL,
+  POPULATE_SUCCESS,
 } = responseStatus;
 
 export default class UserController extends BaseController {
@@ -24,7 +27,7 @@ export default class UserController extends BaseController {
       password,
       Number(process.env.SALT_ROUNDS)
     );
-    let newUser: any;
+    let newUser: UsersAttributes;
     try {
       newUser = await this.model.create({
         username,
@@ -36,7 +39,7 @@ export default class UserController extends BaseController {
     }
 
     const payload: JwtPayload = {
-      id: newUser.id,
+      id: String(newUser.id),
     };
 
     const token: string = jwt.sign(payload, process.env.JWT_SECRET as string, {
@@ -50,7 +53,7 @@ export default class UserController extends BaseController {
   async logIn(req: Request, res: Response) {
     console.log("logging in user");
     const { loginCredentials, password } = req.body;
-    let checkUser: any;
+    let checkUser: UsersAttributes | null;
     try {
       checkUser = await this.model.findOne({ email: loginCredentials });
       if (!checkUser) {
@@ -60,11 +63,11 @@ export default class UserController extends BaseController {
       return res.status(400).json({ status: USER_NOT_FOUND });
     }
 
-    const dbPassword: string = checkUser.password as string;
+    const dbPassword: string = checkUser?.password as string;
     const passwordCheck: boolean = await bcrypt.compare(password, dbPassword);
     if (passwordCheck) {
       const payload: JwtPayload = {
-        id: checkUser.id,
+        id: String(checkUser?.id),
       };
 
       const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
@@ -72,9 +75,41 @@ export default class UserController extends BaseController {
       });
       return res
         .status(200)
-        .json({ status: LOGGED_IN, id: checkUser.id, token });
+        .json({ status: LOGGED_IN, id: String(checkUser?.id), token });
     }
     return res.status(400).json({ status: PASSWORD_MISMATCH });
+  }
+
+  async populateAccounts(req: Request, res: Response) {
+    const { id } = req.body;
+    console.log("populating accounts");
+    let populatedUserData: any;
+    try {
+      populatedUserData = await this.model
+        .findById(id)
+        .populate({ path: "accounts" });
+    } catch (err) {
+      return res.status(400).json({ status: POPULATE_FAIL });
+    }
+    return res
+      .status(200)
+      .json({ status: POPULATE_SUCCESS, data: populatedUserData });
+  }
+
+  async populateRecords(req: Request, res: Response) {
+    console.log("populating accounts and records");
+    const { id } = req.body;
+    let populatedUserData: any;
+    try {
+      populatedUserData = await this.model
+        .findById(id)
+        .populate({ path: "accounts", populate: { path: "accRecords" } });
+    } catch (err) {
+      return res.status(400).json({ status: POPULATE_FAIL });
+    }
+    return res
+      .status(200)
+      .json({ status: POPULATE_SUCCESS, data: populatedUserData });
   }
 
   /* jwt routes */
