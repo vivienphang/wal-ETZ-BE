@@ -36,6 +36,15 @@ export default class AuthRoutes extends BaseRoutes {
       }
     );
 
+    router.post("/logout", (req: Request, res: Response, next: Next) => {
+      req.logout((err) => {
+        if (err) {
+          return next(err);
+        }
+        res.redirect("/");
+      });
+    });
+
     return router;
   }
 }
