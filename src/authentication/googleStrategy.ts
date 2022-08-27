@@ -1,6 +1,8 @@
 import GoogleOauth from "passport-google-oauth20";
 import { userModel } from "../model/model";
 
+require("dotenv").config();
+
 const GoogleStrategy = GoogleOauth.Strategy;
 
 require("./initPassport");

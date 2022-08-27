@@ -10,6 +10,8 @@ const responseStatus = {
   NOT_FOUND: "unable to find data",
   USER_NOT_FOUND: "user not found",
   PASSWORD_MISMATCH: "password mismatch",
+  POPULATE_FAIL: "failed to populate user data",
+  POPULATE_SUCCESS: "populated user data",
   QUERY_COMPLETE: "query complete",
 };
 
