@@ -16,8 +16,6 @@ import AuthController from "./controller/authController";
 
 require("dotenv").config();
 
-connectDB();
-
 const app: express.Application = express();
 const PORT: number | string = (process.env.PORT as string) || 3030;
 
@@ -70,6 +68,8 @@ app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/accounts", accountsRoutes);
 
-app.listen(PORT, () => {
-  console.log(`app is listening at port ${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`app is listening at port ${PORT}`);
+  });
 });
