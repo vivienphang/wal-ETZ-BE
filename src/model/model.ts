@@ -80,7 +80,7 @@ const userSchema: Schema<UsersAttributes> = new Schema<UsersAttributes>(
       unique: true,
       trim: true,
     },
-    password: { type: String, required: true },
+    password: { type: String },
     profilePicture: { type: String },
     defaultCurrency: {
       type: String,

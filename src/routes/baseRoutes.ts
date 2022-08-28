@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import AccountsController from "../controller/accountsController";
+import AuthController from "../controller/authController";
 import UserController from "../controller/userController";
 
 export default class BaseRoutes {
@@ -10,7 +11,7 @@ export default class BaseRoutes {
   public JWTMiddleware: RequestHandler;
 
   constructor(
-    controller: UserController | AccountsController,
+    controller: UserController | AccountsController | AuthController,
     JWTMiddleware: RequestHandler
   ) {
     this.controller = controller;

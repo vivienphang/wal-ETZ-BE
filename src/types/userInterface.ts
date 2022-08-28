@@ -2,10 +2,11 @@ import { Schema } from "mongoose";
 import { FriendAttributes } from "./friendInterface";
 
 export interface UsersAttributes {
+  id?: Schema.Types.ObjectId;
   googleID?: string;
   email: string;
   username: string;
-  password: string;
+  password?: string;
   profilePicture?: string;
   defaultCurrency: string;
   friends?: Array<FriendAttributes>;

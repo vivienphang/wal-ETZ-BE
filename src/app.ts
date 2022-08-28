@@ -3,20 +3,23 @@ import cookieParser from "cookie-parser";
 import passport from "passport";
 import cors from "cors";
 import session from "express-session";
+
 import connectDB from "./config/config";
+
 import { userModel, accountsModel, recordsModel } from "./model/model";
+
 import AccountsController from "./controller/accountsController";
 import UserController from "./controller/userController";
-import UserRoutes from "./routes/userRoutes";
-import authenticateJWT from "./middleware/authMiddleware";
-import AccountsRoutes from "./routes/accountsRoutes";
-import initPassport from "./authentication/initPassport";
-import AuthRoutes from "./routes/authRoutes";
 import AuthController from "./controller/authController";
 
-require("dotenv").config();
+import AccountsRoutes from "./routes/accountsRoutes";
+import UserRoutes from "./routes/userRoutes";
+import AuthRoutes from "./routes/authRoutes";
 
-connectDB();
+import authenticateJWT from "./middleware/authMiddleware";
+import initPassport from "./authentication/initPassport";
+
+require("dotenv").config();
 
 const app: express.Application = express();
 const PORT: number | string = (process.env.PORT as string) || 3030;
@@ -75,6 +78,8 @@ app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/accounts", accountsRoutes);
 
-app.listen(PORT, () => {
-  console.log(`app is listening at port ${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`app is listening at port ${PORT}`);
+  });
 });
