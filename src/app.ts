@@ -27,9 +27,10 @@ const PORT: number | string = (process.env.PORT as string) || 3030;
 // authentication setup
 app.use(
   session({
-    secret: "secretcode",
-    resave: false,
+    secret: process.env.GOOGLE_CLIENT_SECRET,
+    resave: true,
     saveUninitialized: true,
+    cookie: { secure: false },
   })
 );
 initPassport(app);
@@ -53,7 +54,6 @@ const accountsController: AccountsController = new AccountsController(
 );
 const accountsRoutes: express.Router = new AccountsRoutes(
   accountsController,
-
   authenticateJWT
 ).routes();
 
@@ -68,10 +68,10 @@ app.use(
 );
 console.log(process.env.FRONT_END_URL);
 
-passport.authenticate("google");
+// passport.authenticate("google");
 
-app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
 app.use("/accounts", accountsRoutes);
 
 connectDB().then(() => {
