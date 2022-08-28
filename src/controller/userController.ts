@@ -126,4 +126,21 @@ export default class UserController extends BaseController {
     });
     res.status(200).json({ message: JWT_REFRESHED, id, token });
   }
+
+  // extracting request.user details
+  async getUserDetails(req: Request, res: Response) {
+    console.log("running get user details");
+    if (req.user) {
+      const payload: JwtPayload = {
+        id: req.user.id,
+      };
+      const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+        expiresIn: process.env.JWT_EXP,
+      });
+      return res
+        .status(200)
+        .json({ message: JWT_REFRESHED, id: String(req.user.id), token });
+    }
+    return res.status(400).json({ message: "Error. User not found" });
+  }
 }

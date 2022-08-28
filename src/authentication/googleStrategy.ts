@@ -1,9 +1,9 @@
-import GoogleOauth from "passport-google-oauth20";
+import GoogleOAuth, {
+  Strategy as GoogleStrategy,
+} from "passport-google-oauth20";
 import { userModel } from "../model/model";
 
 require("dotenv").config();
-
-const GoogleStrategy = GoogleOauth.Strategy;
 
 require("./initPassport");
 
@@ -18,32 +18,31 @@ const googleStrategy = new GoogleStrategy(
   async (
     accessToken: string,
     refreshToken: string,
-    profile: GoogleOauth.Profile,
-    done: GoogleOauth.VerifyCallback
+    profile: GoogleOAuth.Profile,
+    done: GoogleOAuth.VerifyCallback
   ) => {
     console.log("this is profile:", profile);
     console.log("this is access token:", accessToken);
     console.log("this is refresh token:", refreshToken);
     let userResult;
-    try {
-      userResult = await userModel.findOne({ googleID: profile.id });
-    } catch (err) {
-      done(err as string, profile);
-    }
+
+    const { id, displayName, emails, photos } = profile;
+
+    userResult = await userModel.findOne({
+      email: emails[0].value,
+    });
+    console.log("USER?", userResult);
     if (!userResult) {
-      try {
-        userResult = await userModel.create({
-          googleID: profile.id,
-          username: profile.displayName,
-          email: profile.emails ? profile.emails[0].value : null,
-          profilePicture: profile.photos ? profile.photos[0].value : null,
-        });
-      } catch (err) {
-        done(err as string, profile);
-      }
+      userResult = await userModel.create({
+        googleID: id,
+        username: displayName,
+        email: emails ? emails[0].value : null,
+        profilePicture: photos ? photos[0].value : null,
+      });
     }
+
     console.log("this is user result:", userResult);
-    done(null, profile);
+    done(null, userResult);
   }
 );
 

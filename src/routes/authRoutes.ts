@@ -1,3 +1,4 @@
+import { NextFunction } from "connect";
 import express, { Request, Response, Router } from "express";
 import passport from "passport";
 import BaseRoutes from "./baseRoutes";
@@ -6,19 +7,36 @@ const router: Router = express.Router();
 
 export default class AuthRoutes extends BaseRoutes {
   routes() {
-    router.get("/failed", this.controller.loginFailed.bind(this.controller));
+    // router.get("/failed", this.controller.loginFailed.bind(this.controller));
 
-    router.get("/google", this.controller.googleAuth.bind(this.controller));
-
-    // google authentication
-    router.use(
+    router.get(
+      "/google",
       passport.authenticate("google", {
-        failureRedirect: `${process.env.FRONTEND_URL}/login`,
+        scope: ["profile", "email"],
       })
     );
-    router.get("/google/callback", (req: Request, res: Response) => {
-      res.redirect(process.env.FRONTEND_URL as string);
-    });
+
+    // google authentication
+    router.get(
+      "/google/callback",
+      passport.authenticate("google", {
+        // successRedirect: `${process.env.FRONTEND_URL}`,
+        failureRedirect: `${process.env.FRONTEND_URL}`,
+      }),
+      this.controller.googleAuthSuccess.bind(this.controller)
+    );
+
+    // router.get("/logout", this.controller.requestUser.bind(this.controller));
+    router.get("/logout", this.controller.logoutUser.bind(this.controller));
+    // (req: Request, res: Response, next: NextFunction) => {
+    //   req.logout((err) => {
+    //     if (err) {
+    //       return next(err);
+    //     }
+    //     res.redirect("/");
+    //   });
+    // }
+    // );
 
     return router;
   }
