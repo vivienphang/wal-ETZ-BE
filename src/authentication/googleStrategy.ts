@@ -5,6 +5,8 @@ import { userModel } from "../model/model";
 
 require("dotenv").config();
 
+require("./initPassport");
+
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env;
 
 const googleStrategy = new GoogleStrategy(
@@ -29,10 +31,7 @@ const googleStrategy = new GoogleStrategy(
     userResult = await userModel.findOne({
       email: emails[0].value,
     });
-
     console.log("USER?", userResult);
-    // userResult = await userModel.findOne({ googleID: profile.id });
-
     if (!userResult) {
       userResult = await userModel.create({
         googleID: id,
@@ -43,7 +42,7 @@ const googleStrategy = new GoogleStrategy(
     }
 
     console.log("this is user result:", userResult);
-    done(null, profile);
+    done(null, userResult);
   }
 );
 

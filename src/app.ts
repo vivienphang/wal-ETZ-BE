@@ -3,16 +3,21 @@ import cookieParser from "cookie-parser";
 import passport from "passport";
 import cors from "cors";
 import session from "express-session";
+
 import connectDB from "./config/config";
+
 import { userModel, accountsModel, recordsModel } from "./model/model";
+
 import AccountsController from "./controller/accountsController";
 import UserController from "./controller/userController";
-import UserRoutes from "./routes/userRoutes";
-import authenticateJWT from "./middleware/authMiddleware";
-import AccountsRoutes from "./routes/accountsRoutes";
-import initPassport from "./authentication/initPassport";
-import AuthRoutes from "./routes/authRoutes";
 import AuthController from "./controller/authController";
+
+import AccountsRoutes from "./routes/accountsRoutes";
+import UserRoutes from "./routes/userRoutes";
+import AuthRoutes from "./routes/authRoutes";
+
+import authenticateJWT from "./middleware/authMiddleware";
+import initPassport from "./authentication/initPassport";
 
 require("dotenv").config();
 
@@ -22,9 +27,10 @@ const PORT: number | string = (process.env.PORT as string) || 3030;
 // authentication setup
 app.use(
   session({
-    secret: "secretcode",
-    resave: false,
+    secret: process.env.GOOGLE_CLIENT_SECRET,
+    resave: true,
     saveUninitialized: true,
+    cookie: { secure: false },
   })
 );
 initPassport(app);

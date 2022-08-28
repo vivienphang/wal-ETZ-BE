@@ -9,10 +9,14 @@ const initPassport = (app: any) => {
   app.use(passport.session());
 
   passport.serializeUser((userModel: Express.User, done) => {
+    console.log("serializing user");
+    console.log("----> serialized userModel:", userModel);
     done(null, userModel);
   });
 
   passport.deserializeUser((userModel: Express.User, done) => {
+    console.log("DEserializing user");
+    console.log("----> deserialized userModel:", userModel);
     done(null, userModel);
   });
 };
