@@ -84,6 +84,7 @@ export default class UserController extends BaseController {
     const { id } = req.body;
     console.log("populating accounts");
     let populatedUserData: any;
+    // take what data i need for frontend and only pass that
     try {
       populatedUserData = await this.model
         .findById(id)
@@ -103,7 +104,15 @@ export default class UserController extends BaseController {
     try {
       populatedUserData = await this.model
         .findById(id)
-        .populate({ path: "accounts", populate: { path: "accRecords" } });
+        .populate({
+          path: "accounts",
+          populate: {
+            path: "accRecords",
+            select: "-createdAt -updatedAt -__v",
+          },
+          select: "-createdAt -updatedAt -__v",
+        })
+        .select("-password -createdAt -updatedAt -__v");
     } catch (err) {
       return res.status(400).json({ status: POPULATE_FAIL });
     }

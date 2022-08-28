@@ -8,7 +8,12 @@ export default class AuthRoutes extends BaseRoutes {
   routes() {
     router.get("/failed", this.controller.loginFailed.bind(this.controller));
 
-    router.get("/google", this.controller.googleAuth.bind(this.controller));
+    router.get(
+      "/google",
+      passport.authenticate("google", {
+        scope: ["profile", "email"],
+      })
+    );
 
     // google authentication
     router.use(
