@@ -1,8 +1,10 @@
-import { Express } from "express";
+import Express from "express";
 import passport from "passport";
 import googleStrategy from "./googleStrategy";
 
 const initPassport = (app: any) => {
+  googleStrategy(passport);
+
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -13,8 +15,6 @@ const initPassport = (app: any) => {
   passport.deserializeUser((userModel: Express.User, done) => {
     done(null, userModel);
   });
-
-  googleStrategy(passport);
 };
 
 export default initPassport;

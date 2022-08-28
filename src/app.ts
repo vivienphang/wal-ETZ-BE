@@ -48,7 +48,6 @@ const accountsController: AccountsController = new AccountsController(
 );
 const accountsRoutes: express.Router = new AccountsRoutes(
   accountsController,
-
   authenticateJWT
 ).routes();
 
@@ -62,10 +61,10 @@ app.use(
   })
 );
 
-passport.authenticate("google");
+// passport.authenticate("google");
 
-app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
 app.use("/accounts", accountsRoutes);
 
 connectDB().then(() => {
