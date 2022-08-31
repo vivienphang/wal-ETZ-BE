@@ -59,6 +59,9 @@ export default class UserController extends BaseController {
       if (!checkUser) {
         checkUser = await this.model.findOne({ username: loginCredentials });
       }
+      if (!checkUser) {
+        throw new Error("No user");
+      }
     } catch (err) {
       return res.status(400).json({ status: USER_NOT_FOUND });
     }
