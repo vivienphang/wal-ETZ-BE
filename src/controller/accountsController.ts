@@ -26,7 +26,7 @@ export default class AccountsController extends BaseController {
 
   async createInitialAccount(req: Request, res: Response) {
     console.log("creating first account");
-    const { id, accName, accCurrency, amount } = req.body;
+    const { id, accName, accCurrency, balance: amount } = req.body;
     let userData: UsersAttributes | null;
     let newAccount: AccountsAttributes;
     let newRecord: RecordsAttributes;
@@ -74,7 +74,7 @@ export default class AccountsController extends BaseController {
 
   async createNewAccount(req: Request, res: Response) {
     console.log("creating new account");
-    const { id, accName, accCurrency, amount } = req.body;
+    const { id, accName, accCurrency, balance: amount } = req.body;
     let userData: UsersAttributes | null;
     let newAccount: AccountsAttributes;
     let newRecord: RecordsAttributes;
