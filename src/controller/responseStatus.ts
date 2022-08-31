@@ -13,6 +13,7 @@ const responseStatus = {
   POPULATE_FAIL: "failed to populate user data",
   POPULATE_SUCCESS: "populated user data",
   QUERY_COMPLETE: "query complete",
+  SESSION_ERROR: "session error",
 };
 
 export default responseStatus;

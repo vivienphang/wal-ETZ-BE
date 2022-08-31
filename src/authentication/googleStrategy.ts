@@ -28,9 +28,13 @@ const googleStrategy = new GoogleStrategy(
 
     const { id, displayName, emails, photos } = profile;
 
-    userResult = await userModel.findOne({
-      email: emails[0].value,
-    });
+    userResult = await userModel.findOneAndUpdate(
+      {
+        email: emails![0].value,
+      },
+      { googleID: id },
+      { returnDocument: "after" }
+    );
     console.log("USER?", userResult);
     if (!userResult) {
       userResult = await userModel.create({

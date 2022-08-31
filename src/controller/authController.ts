@@ -6,7 +6,7 @@ import passport from "passport";
 import session from "express-session";
 import BaseController from "./baseController";
 import { userModel } from "../model/model";
-import { NextFunction } from "express-serve-static-core";
+import SESSION_ERROR from "../controller/responseStatus";
 
 require("dotenv").config();
 
@@ -25,6 +25,7 @@ export default class AuthController extends BaseController {
     console.log("google callback: successful response");
     // successful authentication, redirect to home
     console.log("this is REQ.USER:", req.user);
+    const { _id } = req.user;
     res.redirect(`${FRONTEND_URL}/home`);
   }
 
@@ -44,7 +45,7 @@ export default class AuthController extends BaseController {
       req.session.regenerate((error) => {
         if (error) {
           console.log(error);
-          return res.status(400).send(error);
+          return res.status(400).json({ status: SESSION_ERROR });
         }
         return null;
       });
@@ -53,13 +54,12 @@ export default class AuthController extends BaseController {
       req.logout((error) => {
         if (error) {
           console.log(error);
-          return res.status(400).send(error);
+          return res.status(400).json({ status: SESSION_ERROR });
         }
       });
       req.session.destroy((error) => {
         console.log("req.session destroyed!");
         console.log("error:", error);
-        return res.status(400).send(error);
       });
       return res.redirect(`${FRONTEND_URL}`);
     }
