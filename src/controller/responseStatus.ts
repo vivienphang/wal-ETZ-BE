@@ -8,7 +8,7 @@ const responseStatus = {
   JWT_REFRESHED: "JWT successfully refreshed",
   LOGGED_IN: "Log in successful",
   NOT_FOUND: "unable to find data",
-  USER_NOT_FOUND: "user not found",
+  USER_NOT_FOUND: "username/ email not found",
   PASSWORD_MISMATCH: "password mismatch",
   POPULATE_FAIL: "failed to populate user data",
   POPULATE_SUCCESS: "populated user data",
