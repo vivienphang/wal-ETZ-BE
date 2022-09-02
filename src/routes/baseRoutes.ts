@@ -8,7 +8,7 @@ export default class BaseRoutes {
   // public controller: UserController | AccountsController;
   public controller: any;
 
-  public JWTMiddleware: RequestHandler;
+  public JWTMiddleware: any;
 
   constructor(
     controller: UserController | AccountsController | AuthController,

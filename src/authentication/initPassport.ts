@@ -1,4 +1,3 @@
-import Express from "express";
 import passport from "passport";
 import googleStrategy from "./googleStrategy";
 
@@ -8,14 +7,14 @@ const initPassport = (app: any) => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  passport.serializeUser((userModel: Express.User, done) => {
+  passport.serializeUser((userModel: globalThis.Express.User, done) => {
     console.log("serializing user");
     console.log("----> serialized userModel:", userModel);
     done(null, userModel);
   });
 
-  passport.deserializeUser((userModel: Express.User, done) => {
-    console.log("DEserializing user");
+  passport.deserializeUser((userModel: globalThis.Express.User, done) => {
+    console.log("Deserializing user");
     console.log("----> deserialized userModel:", userModel);
     done(null, userModel);
   });

@@ -1,19 +1,17 @@
-/* eslint-disable no-sequences */
-/* eslint-disable no-unused-expressions */
-/* eslint-disable class-methods-use-this */
 import { Request, Response } from "express";
-import passport from "passport";
-import session from "express-session";
+import jwt from "jsonwebtoken";
 import BaseController from "./baseController";
-import { userModel } from "../model/model";
-import SESSION_ERROR from "../controller/responseStatus";
+import responseStatus from "../controller/responseStatus";
+import { payloadInterface } from "../types/jwtPayload";
+
+const { SESSION_ERROR, OAUTH_LOGGED_IN, OAUTH_LOGGED_IN_FAIL } = responseStatus;
 
 require("dotenv").config();
 
 const { FRONTEND_URL } = process.env;
 
 export default class AuthController extends BaseController {
-  async loginFailed(_req: Request, res: Response) {
+  loginFailed(_req: Request, res: Response) {
     console.log("running login failed");
     res.status(401).json({
       success: false,
@@ -21,16 +19,16 @@ export default class AuthController extends BaseController {
     });
   }
 
-  async googleAuthSuccess(req: Request, res: Response) {
+  googleAuthSuccess(req: Request, res: Response) {
     console.log("google callback: successful response");
     // successful authentication, redirect to home
     console.log("this is REQ.USER:", req.user);
-    const { _id } = req.user;
-    res.redirect(`${FRONTEND_URL}/home`);
+    res.cookie("id", req.user!._id);
+    res.redirect(`${FRONTEND_URL}/oauthLoader`);
   }
 
   // extracting request.user details
-  async requestUser(req: Request, res: Response) {
+  requestUser(req: Request, res: Response) {
     console.log("running req.user");
     if (req.user) {
       console.log("REQ.USER HERE", req.user);
@@ -39,7 +37,7 @@ export default class AuthController extends BaseController {
   }
 
   // delete the user session
-  async logoutUser(req: Request, res: Response) {
+  logoutUser(req: Request, res: Response) {
     console.log("this is REQ.USER", req.user);
     if (req.session) {
       req.session.regenerate((error) => {
@@ -64,5 +62,21 @@ export default class AuthController extends BaseController {
       return res.redirect(`${FRONTEND_URL}`);
     }
     return res.redirect(`${FRONTEND_URL}`);
+  }
+
+  oauthLoader(req: Request, res: Response) {
+    console.log(req.url);
+    console.log(req.cookies);
+    if (req.cookies.id) {
+      const payload: payloadInterface = {
+        id: req.cookies.id,
+      };
+      const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+        expiresIn: process.env.JWT_EXP,
+      });
+      res.status(200).json({ status: OAUTH_LOGGED_IN, token });
+      return;
+    }
+    res.status(400).json({ status: OAUTH_LOGGED_IN_FAIL });
   }
 }
