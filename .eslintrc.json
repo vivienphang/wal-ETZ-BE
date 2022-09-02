@@ -11,11 +11,13 @@
   },
   "plugins": ["@typescript-eslint"],
   "rules": {
-    "no-console": "off",
-    "object-curly-newline": "off",
-    "quotes": "off",
+    "class-methods-use-this": "off",
     "comma-dangle": "off",
+    "no-console": "off",
+    "no-underscore-dangle": "off",
+    "object-curly-newline": "off",
     "operator-linebreak": "off",
+    "quotes": "off",
     "import/no-unresolved": "off",
     "import/extensions": "off"
   }

@@ -3,14 +3,15 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
-import { JWTRequest } from "../types/jwtRequestInterface";
-import { JwtPayload } from "../types/jwtPayload";
+import { JWTMiddlewareRequest, JWTRequest } from "../types/jwtRequestInterface";
+import { payloadInterface } from "../types/jwtPayload";
 import { UsersAttributes } from "../types/userInterface";
 
 const {
   CREATED_USER,
   CREATE_USER_FAILED,
   JWT_REFRESHED,
+  JWT_NO_USER,
   LOGGED_IN,
   USER_NOT_FOUND,
   PASSWORD_MISMATCH,
@@ -38,16 +39,14 @@ export default class UserController extends BaseController {
       return res.status(400).json({ status: CREATE_USER_FAILED });
     }
 
-    const payload: JwtPayload = {
+    const payload: payloadInterface = {
       id: String(newUser.id),
     };
 
     const token: string = jwt.sign(payload, process.env.JWT_SECRET as string, {
       expiresIn: process.env.JWT_EXP,
     });
-    return res
-      .status(200)
-      .json({ status: CREATED_USER, id: newUser.id, token });
+    return res.status(200).json({ status: CREATED_USER, token });
   }
 
   async logIn(req: Request, res: Response) {
@@ -69,29 +68,60 @@ export default class UserController extends BaseController {
     const dbPassword: string = checkUser?.password as string;
     const passwordCheck: boolean = await bcrypt.compare(password, dbPassword);
     if (passwordCheck) {
-      const payload: JwtPayload = {
+      const payload: payloadInterface = {
         id: String(checkUser?.id),
       };
 
       const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
         expiresIn: process.env.JWT_EXP,
       });
-      return res
-        .status(200)
-        .json({ status: LOGGED_IN, id: String(checkUser?.id), token });
+      return res.status(200).json({ status: LOGGED_IN, token });
     }
     return res.status(400).json({ status: PASSWORD_MISMATCH });
   }
 
-  async populateAccounts(req: Request, res: Response) {
+  // extracting request.user details
+  async getUserDetails(req: JWTRequest, res: Response) {
+    console.log("running get user details");
+    console.log(this.model);
+    if (req.user) {
+      const payload: payloadInterface = {
+        id: req.user.id,
+      };
+      const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+        expiresIn: process.env.JWT_EXP,
+      });
+      return res.status(200).json({ status: JWT_REFRESHED, token });
+    }
+    return res.status(400).json({ status: JWT_NO_USER });
+  }
+
+  /* jwt routes */
+  JWTRefresh(req: JWTMiddlewareRequest, res: Response) {
+    console.log("checking if jwt is present");
+    console.log(this.model);
     const { id } = req.body;
+    const payload: payloadInterface = {
+      id,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+      expiresIn: process.env.JWT_EXP,
+    });
+    res.status(200).json({ status: JWT_REFRESHED, token });
+  }
+
+  async populateAccounts(req: JWTMiddlewareRequest, res: Response) {
     console.log("populating accounts");
+    const { id } = req.body;
     let populatedUserData: any;
-    // take what data i need for frontend and only pass that
     try {
       populatedUserData = await this.model
         .findById(id)
         .populate({ path: "accounts" });
+      if (!populatedUserData) {
+        throw new Error("no user exist");
+      }
     } catch (err) {
       return res.status(400).json({ status: POPULATE_FAIL });
     }
@@ -100,7 +130,7 @@ export default class UserController extends BaseController {
       .json({ status: POPULATE_SUCCESS, data: populatedUserData });
   }
 
-  async populateRecords(req: Request, res: Response) {
+  async populateRecords(req: JWTMiddlewareRequest, res: Response) {
     console.log("populating accounts and records");
     const { id } = req.body;
     let populatedUserData: any;
@@ -116,43 +146,14 @@ export default class UserController extends BaseController {
           select: "-createdAt -updatedAt -__v",
         })
         .select("-password -createdAt -updatedAt -__v");
+      if (!populatedUserData) {
+        throw new Error("no user exist");
+      }
     } catch (err) {
       return res.status(400).json({ status: POPULATE_FAIL });
     }
     return res
       .status(200)
       .json({ status: POPULATE_SUCCESS, data: populatedUserData });
-  }
-
-  /* jwt routes */
-  JWTRefresh(req: JWTRequest, res: Response) {
-    console.log("checking if jwt is present");
-    console.log(this.model);
-    const { id } = req.body;
-    const payload: JwtPayload = {
-      id,
-    };
-
-    const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-      expiresIn: process.env.JWT_EXP,
-    });
-    res.status(200).json({ message: JWT_REFRESHED, id, token });
-  }
-
-  // extracting request.user details
-  async getUserDetails(req: Request, res: Response) {
-    console.log("running get user details");
-    if (req.user) {
-      const payload: JwtPayload = {
-        id: req.user.id,
-      };
-      const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-        expiresIn: process.env.JWT_EXP,
-      });
-      return res
-        .status(200)
-        .json({ message: JWT_REFRESHED, id: String(req.user.id), token });
-    }
-    return res.status(400).json({ message: "Error. User not found" });
   }
 }

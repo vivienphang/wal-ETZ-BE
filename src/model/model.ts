@@ -3,6 +3,7 @@ import { AccountsAttributes } from "../types/accountsInterface";
 import { FriendAttributes } from "../types/friendInterface";
 import { RecordsAttributes } from "../types/recordsInterface";
 import { UsersAttributes } from "../types/userInterface";
+import currencyList from "./currencyList";
 
 const friendsSchema: Schema<FriendAttributes> = new Schema<FriendAttributes>({
   username: { type: String },
@@ -40,19 +41,7 @@ const accountsSchema: Schema<AccountsAttributes> =
       accCurrency: {
         type: String,
         required: true,
-        enum: [
-          "SGD",
-          "MYR",
-          "IDR",
-          "THB",
-          "HKD",
-          "CNY",
-          "JPY",
-          "USD",
-          "AUD",
-          "VND",
-          "TWD",
-        ],
+        enum: currencyList,
       },
       // this refers to records model
       accRecords: [{ type: Schema.Types.ObjectId, ref: "records" }],
@@ -84,19 +73,7 @@ const userSchema: Schema<UsersAttributes> = new Schema<UsersAttributes>(
     profilePicture: { type: String },
     defaultCurrency: {
       type: String,
-      enum: [
-        "SGD",
-        "MYR",
-        "IDR",
-        "THB",
-        "HKD",
-        "CNY",
-        "JPY",
-        "USD",
-        "AUD",
-        "VND",
-        "TWD",
-      ],
+      enum: currencyList,
     },
     friends: [friendsSchema],
     friendRequest: [friendRequestSchema],

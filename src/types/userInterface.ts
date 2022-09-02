@@ -12,5 +12,5 @@ export interface UsersAttributes {
   friends?: Array<FriendAttributes>;
   friendRequest?: Array<FriendAttributes>;
   receivedRequest?: Array<FriendAttributes>;
-  accounts?: [Schema.Types.ObjectId];
+  accounts?: Schema.Types.ObjectId[];
 }

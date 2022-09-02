@@ -1,5 +1,4 @@
-import { NextFunction } from "connect";
-import express, { Request, Response, Router } from "express";
+import express, { Router } from "express";
 import passport from "passport";
 import BaseRoutes from "./baseRoutes";
 
@@ -25,6 +24,8 @@ export default class AuthRoutes extends BaseRoutes {
       }),
       this.controller.googleAuthSuccess.bind(this.controller)
     );
+
+    router.get("/oauth", this.controller.oauthLoader.bind(this.controller));
 
     // router.get("/logout", this.controller.requestUser.bind(this.controller));
     router.get("/logout", this.controller.logoutUser.bind(this.controller));

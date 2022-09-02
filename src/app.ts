@@ -1,6 +1,5 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import passport from "passport";
 import cors from "cors";
 import session from "express-session";
 
@@ -22,12 +21,12 @@ import initPassport from "./authentication/initPassport";
 require("dotenv").config();
 
 const app: express.Application = express();
-const PORT: number | string = (process.env.PORT as string) || 3030;
+const PORT: number | string = process.env.PORT || 3030;
 
 // authentication setup
 app.use(
   session({
-    secret: process.env.GOOGLE_CLIENT_SECRET,
+    secret: process.env.GOOGLE_CLIENT_SECRET as string,
     resave: true,
     saveUninitialized: true,
     cookie: { secure: false },

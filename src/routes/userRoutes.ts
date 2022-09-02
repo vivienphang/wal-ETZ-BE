@@ -9,20 +9,19 @@ export default class UsersRoutes extends BaseRoutes {
     router.post("/signup", this.controller.signUp.bind(this.controller));
     router.post("/login", this.controller.logIn.bind(this.controller));
 
-    // test routes - move this to auth when done
-    router.post(
+    /* auth routes */
+    router.use(this.JWTMiddleware);
+
+    router.post("/refresh", this.controller.JWTRefresh.bind(this.controller));
+    router.get(
       "/populateAccounts",
       this.controller.populateAccounts.bind(this.controller)
     );
 
-    router.post(
+    router.get(
       "/populateRecords",
       this.controller.populateRecords.bind(this.controller)
     );
-
-    /* auth routes */
-    router.use(this.JWTMiddleware);
-    router.post("/refresh", this.controller.JWTRefresh.bind(this.controller));
     return router;
   }
 }

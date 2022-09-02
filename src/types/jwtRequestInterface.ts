@@ -1,11 +1,13 @@
 import { Request } from "express";
 
 interface UserDetails {
-  userID: string;
-  username: string;
-  email: string;
+  id: string;
 }
 
 export interface JWTRequest extends Request {
-  userDetails?: UserDetails;
+  user?: UserDetails;
+}
+
+export interface JWTMiddlewareRequest extends Request {
+  jwt?: UserDetails;
 }
