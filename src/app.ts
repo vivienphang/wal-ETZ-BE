@@ -10,9 +10,11 @@ import { userModel, accountsModel, recordsModel } from "./model/model";
 import AccountsController from "./controller/accountsController";
 import UserController from "./controller/userController";
 import AuthController from "./controller/authController";
+import RecordsController from "./controller/recordsController";
 
 import AccountsRoutes from "./routes/accountsRoutes";
 import UserRoutes from "./routes/userRoutes";
+import RecordsRoutes from "./routes/recordsRoutes";
 import AuthRoutes from "./routes/authRoutes";
 
 import authenticateJWT from "./middleware/authMiddleware";
@@ -56,6 +58,15 @@ const accountsRoutes: express.Router = new AccountsRoutes(
   authenticateJWT
 ).routes();
 
+const recordsController: RecordsController = new RecordsController(
+  recordsModel,
+  accountsModel
+);
+const recordsRoutes: express.Router = new RecordsRoutes(
+  recordsController,
+  authenticateJWT
+).routes();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -72,6 +83,7 @@ console.log(process.env.FRONT_END_URL);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/accounts", accountsRoutes);
+app.use("/records", recordsRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
