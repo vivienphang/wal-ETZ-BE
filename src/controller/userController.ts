@@ -142,6 +142,7 @@ export default class UserController extends BaseController {
           populate: {
             path: "accRecords",
             select: "-createdAt -updatedAt -__v",
+            options: { sort: "-recordDate" },
           },
           select: "-createdAt -updatedAt -__v",
         })
