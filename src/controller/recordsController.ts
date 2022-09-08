@@ -22,16 +22,28 @@ export default class RecordsController extends BaseController {
   async newRecord(req: Request, res: Response) {
     console.log("Creating a new record");
     const {
+<<<<<<< HEAD
+=======
       // Data from the frontEnd
       token,
       accId,
+>>>>>>> 04dfca3bcb6a54cbf73f73323569a2354e59655f
       amount,
       name,
       comment,
       date,
       isExpense,
+<<<<<<< HEAD
+      recordName,
+      recordComment,
+      recordCategory,
+      recordPhoto,
+      recordDate,
+      acc,
+=======
       acc,
       cat,
+>>>>>>> 04dfca3bcb6a54cbf73f73323569a2354e59655f
     } = req.body;
     console.log(token, accId, amount, name, comment, date, isExpense, acc, cat);
     let newRecord: RecordsAttributes;
@@ -41,10 +53,18 @@ export default class RecordsController extends BaseController {
       newRecord = await this.model.create({
         amount: Types.Decimal128.fromString(amount),
         isExpense,
+<<<<<<< HEAD
+        recordName,
+        recordCategory,
+        recordDate,
+        recordPhoto,
+        recordComment,
+=======
         recordName: name,
         recordCategory: cat,
         recordComment: comment,
         recordDate: date,
+>>>>>>> 04dfca3bcb6a54cbf73f73323569a2354e59655f
       });
     } catch (err) {
       console.log(err);
@@ -52,9 +72,28 @@ export default class RecordsController extends BaseController {
     }
     // Add this record id into the corrosponding record
     try {
+<<<<<<< HEAD
+      updateAccount = await this.accounts
+        .findByIdAndUpdate(
+          acc,
+          {
+            $push: { accRecords: newRecord.id },
+          },
+          { returnDocument: "after" }
+        )
+        .populate({
+          path: "accRecords",
+          options: {
+            sort: "-recordDate",
+            select: "-createdAt -updatedAt -__v",
+          },
+        })
+        .select("-createdAt -updatedAt -__v");
+=======
       updateAccount = await this.accounts.findByIdAndUpdate(accId, {
         $push: { accRecords: newRecord.id },
       });
+>>>>>>> 04dfca3bcb6a54cbf73f73323569a2354e59655f
       if (updateAccount === null) {
         throw new Error("Account doesnt exist");
       }
@@ -63,6 +102,6 @@ export default class RecordsController extends BaseController {
       await this.model.findByIdAndDelete(newRecord.id);
       return res.status(400).json({ status: CREATE_ACCOUNT_FAILED });
     }
-    return res.status(200).json({ newRecord });
+    return res.status(200).json({ updateAccount });
   }
 }
