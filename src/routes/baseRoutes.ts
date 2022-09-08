@@ -3,6 +3,7 @@ import AccountsController from "../controller/accountsController";
 import AuthController from "../controller/authController";
 import RecordsController from "../controller/recordsController";
 import UserController from "../controller/userController";
+import RecordsController from "../controller/recordsController";
 
 export default class BaseRoutes {
   // dunno why this dont work

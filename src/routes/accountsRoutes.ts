@@ -6,11 +6,6 @@ const router: Router = express.Router();
 export default class AccountsRoutes extends BaseRoutes {
   routes() {
     /* no auth routes */
-    // for testing purposes
-    router.post(
-      "/initTest",
-      this.controller.createInitialAccount.bind(this.controller)
-    );
     router.post(
       "/newTest",
       this.controller.createNewAccount.bind(this.controller)

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import BaseController from "./baseController";
 import responseStatus from "../controller/responseStatus";
 import { payloadInterface } from "../types/jwtPayload";
+import { customReq } from "../types/extendedExpressInterface";
 
 const { SESSION_ERROR, OAUTH_LOGGED_IN, OAUTH_LOGGED_IN_FAIL } = responseStatus;
 
@@ -19,7 +20,7 @@ export default class AuthController extends BaseController {
     });
   }
 
-  googleAuthSuccess(req: Request, res: Response) {
+  googleAuthSuccess(req: customReq, res: Response) {
     console.log("google callback: successful response");
     // successful authentication, redirect to home
     console.log("this is REQ.USER:", req.user);
