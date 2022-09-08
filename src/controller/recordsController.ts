@@ -2,7 +2,6 @@ import { Model, Types } from "mongoose";
 import { Request, Response } from "express";
 import { AccountsAttributes } from "../types/accountsInterface";
 import { RecordsAttributes } from "../types/recordsInterface";
-import { UsersAttributes } from "../types/userInterface";
 import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
 
@@ -22,30 +21,16 @@ export default class RecordsController extends BaseController {
   async newRecord(req: Request, res: Response) {
     console.log("Creating a new record");
     const {
-<<<<<<< HEAD
-=======
       // Data from the frontEnd
-      token,
-      accId,
->>>>>>> 04dfca3bcb6a54cbf73f73323569a2354e59655f
       amount,
-      name,
-      comment,
-      date,
       isExpense,
-<<<<<<< HEAD
       recordName,
       recordComment,
       recordCategory,
       recordPhoto,
       recordDate,
       acc,
-=======
-      acc,
-      cat,
->>>>>>> 04dfca3bcb6a54cbf73f73323569a2354e59655f
     } = req.body;
-    console.log(token, accId, amount, name, comment, date, isExpense, acc, cat);
     let newRecord: RecordsAttributes;
     let updateAccount: AccountsAttributes | null;
     // Adding the record into the records table
@@ -53,18 +38,11 @@ export default class RecordsController extends BaseController {
       newRecord = await this.model.create({
         amount: Types.Decimal128.fromString(amount),
         isExpense,
-<<<<<<< HEAD
         recordName,
         recordCategory,
         recordDate,
         recordPhoto,
         recordComment,
-=======
-        recordName: name,
-        recordCategory: cat,
-        recordComment: comment,
-        recordDate: date,
->>>>>>> 04dfca3bcb6a54cbf73f73323569a2354e59655f
       });
     } catch (err) {
       console.log(err);
@@ -72,7 +50,6 @@ export default class RecordsController extends BaseController {
     }
     // Add this record id into the corrosponding record
     try {
-<<<<<<< HEAD
       updateAccount = await this.accounts
         .findByIdAndUpdate(
           acc,
@@ -89,11 +66,6 @@ export default class RecordsController extends BaseController {
           },
         })
         .select("-createdAt -updatedAt -__v");
-=======
-      updateAccount = await this.accounts.findByIdAndUpdate(accId, {
-        $push: { accRecords: newRecord.id },
-      });
->>>>>>> 04dfca3bcb6a54cbf73f73323569a2354e59655f
       if (updateAccount === null) {
         throw new Error("Account doesnt exist");
       }
