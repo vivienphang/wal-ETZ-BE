@@ -1,7 +1,6 @@
 import { RequestHandler } from "express";
 import AccountsController from "../controller/accountsController";
 import AuthController from "../controller/authController";
-import RecordsController from "../controller/recordsController";
 import UserController from "../controller/userController";
 import RecordsController from "../controller/recordsController";
 
