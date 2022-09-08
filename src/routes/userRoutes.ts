@@ -17,10 +17,13 @@ export default class UsersRoutes extends BaseRoutes {
       "/populateAccounts",
       this.controller.populateAccounts.bind(this.controller)
     );
-
     router.get(
       "/populateRecords",
       this.controller.populateRecords.bind(this.controller)
+    );
+    router.post(
+      "/updateProfile",
+      this.controller.updateProfile.bind(this.controller)
     );
     return router;
   }

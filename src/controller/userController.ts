@@ -6,6 +6,7 @@ import responseStatus from "./responseStatus";
 import { JWTMiddlewareRequest, JWTRequest } from "../types/jwtRequestInterface";
 import { payloadInterface } from "../types/jwtPayload";
 import { UsersAttributes } from "../types/userInterface";
+import { userModel } from "../model/model";
 
 const {
   CREATED_USER,
@@ -17,6 +18,7 @@ const {
   PASSWORD_MISMATCH,
   POPULATE_FAIL,
   POPULATE_SUCCESS,
+  UPDATE_PROFILE_FAILED,
 } = responseStatus;
 
 export default class UserController extends BaseController {
@@ -156,5 +158,17 @@ export default class UserController extends BaseController {
     return res
       .status(200)
       .json({ status: POPULATE_SUCCESS, data: populatedUserData });
+  }
+
+  async updateProfile(req: JWTRequest, res: Response) {
+    console.log("updating user details");
+    const { id, username, currency } = req.body;
+    console.log("from REQ,BODY:", req.body);
+    let getUserProfile: any;
+    try {
+      getUserProfile = await userModel.findById(id);
+    } catch (err) {
+      return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
+    }
   }
 }

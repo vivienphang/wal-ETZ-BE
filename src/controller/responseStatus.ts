@@ -17,6 +17,7 @@ const responseStatus = {
   POPULATE_SUCCESS: "populated user data",
   QUERY_COMPLETE: "query complete",
   SESSION_ERROR: "session error",
+  UPDATE_PROFILE_FAILED: "failed to update user profile",
 };
 
 export default responseStatus;
