@@ -1,4 +1,4 @@
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { Request, Response } from "express";
 import { AccountsAttributes } from "../types/accountsInterface";
 import { RecordsAttributes } from "../types/recordsInterface";
@@ -32,7 +32,7 @@ export default class AccountsController extends BaseController {
     let newRecord: RecordsAttributes;
     try {
       newRecord = await this.records.create({
-        amount: Types.Decimal128.fromString(amount),
+        amount: Number(amount),
         isExpense: false,
         recordName: "Initializing Account",
         recordCategory: "Misc.",
@@ -80,7 +80,7 @@ export default class AccountsController extends BaseController {
     let newRecord: RecordsAttributes;
     try {
       newRecord = await this.records.create({
-        amount: Types.Decimal128.fromString(amount),
+        amount: Number(amount),
         isExpense: false,
         recordName: "Initializing Account",
         recordCategory: "Misc.",

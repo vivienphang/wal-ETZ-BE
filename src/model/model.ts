@@ -1,27 +1,16 @@
 import { Model, model, Schema } from "mongoose";
 import { AccountsAttributes } from "../types/accountsInterface";
-import { FriendAttributes } from "../types/friendInterface";
 import { RecordsAttributes } from "../types/recordsInterface";
 import { UsersAttributes } from "../types/userInterface";
 import currencyList from "./currencyList";
 
-const friendsSchema: Schema<FriendAttributes> = new Schema<FriendAttributes>({
-  username: { type: String },
-});
-
-const friendRequestSchema: Schema<FriendAttributes> =
-  new Schema<FriendAttributes>({
-    username: { type: String },
-  });
-
-const receivedRequestSchema: Schema<FriendAttributes> =
-  new Schema<FriendAttributes>({
-    username: { type: String },
-  });
-
 const recordsSchema: Schema<RecordsAttributes> = new Schema<RecordsAttributes>(
   {
-    amount: { type: Schema.Types.Decimal128, required: true },
+    amount: {
+      type: Number,
+      required: true,
+      set: (value: Number) => Number(value.toFixed(2)),
+    },
     isExpense: { type: Boolean, required: true },
     recordName: { type: String },
     recordComment: { type: String },
@@ -75,9 +64,6 @@ const userSchema: Schema<UsersAttributes> = new Schema<UsersAttributes>(
       type: String,
       enum: currencyList,
     },
-    friends: [friendsSchema],
-    friendRequest: [friendRequestSchema],
-    receivedRequest: [receivedRequestSchema],
     // this refers to accounts model
     accounts: [{ type: Schema.Types.ObjectId, ref: "accounts" }],
   },

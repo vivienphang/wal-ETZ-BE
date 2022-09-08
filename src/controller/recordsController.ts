@@ -1,4 +1,4 @@
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { Request, Response } from "express";
 import { AccountsAttributes } from "../types/accountsInterface";
 import { RecordsAttributes } from "../types/recordsInterface";
@@ -21,7 +21,6 @@ export default class RecordsController extends BaseController {
   async newRecord(req: Request, res: Response) {
     console.log("Creating a new record");
     const {
-      // Data from the frontEnd
       amount,
       isExpense,
       recordName,
@@ -36,7 +35,7 @@ export default class RecordsController extends BaseController {
     // Adding the record into the records table
     try {
       newRecord = await this.model.create({
-        amount: Types.Decimal128.fromString(amount),
+        amount: Number(amount),
         isExpense,
         recordName,
         recordCategory,

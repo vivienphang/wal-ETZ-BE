@@ -160,15 +160,15 @@ export default class UserController extends BaseController {
       .json({ status: POPULATE_SUCCESS, data: populatedUserData });
   }
 
-  async updateProfile(req: JWTRequest, res: Response) {
-    console.log("updating user details");
-    const { id, username, currency } = req.body;
-    console.log("from REQ,BODY:", req.body);
-    let getUserProfile: any;
-    try {
-      getUserProfile = await userModel.findById(id);
-    } catch (err) {
-      return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
-    }
-  }
+  // async updateProfile(req: JWTRequest, res: Response) {
+  //   console.log("updating user details");
+  //   const { id, username, currency } = req.body;
+  //   console.log("from REQ,BODY:", req.body);
+  //   let getUserProfile: any;
+  //   try {
+  //     getUserProfile = await userModel.findById(id);
+  //   } catch (err) {
+  //     return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
+  //   }
+  // }
 }
