@@ -21,8 +21,6 @@ export default class RecordsController extends BaseController {
   async newRecord(req: Request, res: Response) {
     console.log("Creating a new record");
     const {
-      // This id is the account id
-      id,
       amount,
       isExpense,
       recordName,
@@ -30,6 +28,7 @@ export default class RecordsController extends BaseController {
       recordCategory,
       recordPhoto,
       recordDate,
+      acc,
     } = req.body;
     let newRecord: RecordsAttributes;
     let updateAccount: AccountsAttributes | null;
@@ -41,17 +40,30 @@ export default class RecordsController extends BaseController {
         recordName,
         recordCategory,
         recordDate,
-        recordComment,
         recordPhoto,
+        recordComment,
       });
     } catch (err) {
       return res.status(400).json({ status: CREATE_RECORD_FAILED });
     }
     // Add this record id into the corrosponding record
     try {
-      updateAccount = await this.accounts.findByIdAndUpdate(id, {
-        $push: { records: newRecord.id },
-      });
+      updateAccount = await this.accounts
+        .findByIdAndUpdate(
+          acc,
+          {
+            $push: { accRecords: newRecord.id },
+          },
+          { returnDocument: "after" }
+        )
+        .populate({
+          path: "accRecords",
+          options: {
+            sort: "-recordDate",
+            select: "-createdAt -updatedAt -__v",
+          },
+        })
+        .select("-createdAt -updatedAt -__v");
       if (updateAccount === null) {
         throw new Error("Account doesnt exist");
       }
@@ -60,6 +72,6 @@ export default class RecordsController extends BaseController {
       await this.model.findByIdAndDelete(newRecord.id);
       return res.status(400).json({ status: CREATE_RECORD_FAILED });
     }
-    return res.status(200).json({ newRecord });
+    return res.status(200).json({ updateAccount });
   }
 }

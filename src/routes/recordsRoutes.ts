@@ -5,9 +5,10 @@ const router: Router = express.Router();
 
 export default class RecordsRoutes extends BaseRoutes {
   routes() {
-    /* no auth routes */
+    /* auth routes */
     // for testing purposes
-    router.post("newRecord", this.controller.newRecord.bind(this.controller));
+    router.use(this.JWTMiddleware);
+    router.post("/newRecord", this.controller.newRecord.bind(this.controller));
     return router;
   }
 }
