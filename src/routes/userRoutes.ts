@@ -22,7 +22,7 @@ export default class UsersRoutes extends BaseRoutes {
       this.controller.populateRecords.bind(this.controller)
     );
     router.post(
-      "/updateProfile",
+      "/updateProfile/",
       this.controller.updateProfile.bind(this.controller)
     );
     return router;

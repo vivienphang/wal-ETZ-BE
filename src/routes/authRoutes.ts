@@ -19,25 +19,13 @@ export default class AuthRoutes extends BaseRoutes {
     router.get(
       "/google/callback",
       passport.authenticate("google", {
-        // successRedirect: `${process.env.FRONTEND_URL}`,
         failureRedirect: `${process.env.FRONTEND_URL}`,
       }),
       this.controller.googleAuthSuccess.bind(this.controller)
     );
 
     router.get("/oauth", this.controller.oauthLoader.bind(this.controller));
-
-    // router.get("/logout", this.controller.requestUser.bind(this.controller));
     router.get("/logout", this.controller.logoutUser.bind(this.controller));
-    // (req: Request, res: Response, next: NextFunction) => {
-    //   req.logout((err) => {
-    //     if (err) {
-    //       return next(err);
-    //     }
-    //     res.redirect("/");
-    //   });
-    // }
-    // );
 
     return router;
   }

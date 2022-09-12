@@ -1,6 +1,10 @@
+/* eslint-disable max-len */
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import aws from "aws-sdk";
+import multer from "multer";
+import multerS3 from "multer-s3";
 import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
 import { JWTMiddlewareRequest, JWTRequest } from "../types/jwtRequestInterface";
@@ -19,8 +23,34 @@ const {
   POPULATE_FAIL,
   POPULATE_SUCCESS,
   UPDATE_PROFILE_FAILED,
+  UPDATE_PROFILE_SUCCESS,
 } = responseStatus;
 
+// Connect to S3 bucket
+const s3 = new aws.S3({
+  accessKeyId: process.env.S3_ACCESS_KEY,
+  secretAccessKey: process.env.S3_SECRET_ACCESS,
+  region: process.env.S3_BUCKET_REGION,
+});
+
+const upload = (bucketName: string) =>
+  multer({
+    storage: multerS3({
+      s3,
+      bucket: bucketName, // "bucket-for-capstone",
+      metadata(
+        req: any,
+        file: { fieldName: any },
+        // eslint-disable-next-line no-unused-vars
+        cb: (arg0: null, arg1: { fieldName: any }) => void
+      ) {
+        cb(null, { fieldName: file.fieldName });
+      },
+      key(req, file, cb) {
+        cb(null, "image.jpeg"); // accepts 2 params, null and file name as image.jpeg
+      },
+    }),
+  });
 export default class UserController extends BaseController {
   /* non jwt routes */
   async signUp(req: Request, res: Response) {
@@ -160,15 +190,40 @@ export default class UserController extends BaseController {
       .json({ status: POPULATE_SUCCESS, data: populatedUserData });
   }
 
-  // async updateProfile(req: JWTRequest, res: Response) {
-  //   console.log("updating user details");
-  //   const { id, username, currency } = req.body;
-  //   console.log("from REQ,BODY:", req.body);
-  //   let getUserProfile: any;
-  //   try {
-  //     getUserProfile = await userModel.findById(id);
-  //   } catch (err) {
-  //     return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
-  //   }
-  // }
+  async updateProfile(req: Request, res: Response) {
+    console.log("updating user details");
+    const { id, username, currency } = req.body;
+    console.log("from REQ,BODY:", req.body);
+    console.log("username:", username, "currency:", currency, id);
+    let updateProfile: UsersAttributes | null;
+    try {
+      updateProfile = await this.model
+        .findByIdAndUpdate(
+          id,
+          { username, defaultCurrency: currency },
+          { returnDocument: "after" }
+        )
+        .select("-password -createdAt -updatedAt -__v -accounts");
+      console.log(updateProfile);
+      if (!updateProfile) {
+        throw new Error("no user exist");
+      }
+    } catch (err) {
+      return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
+    }
+    return res
+      .status(200)
+      .json({ status: UPDATE_PROFILE_SUCCESS, data: updateProfile });
+  }
+
+  async updatePicture(req: Request, res: Response) {
+    const uploadSingle = upload("bucket-for-capstone").single("image-upload");
+
+    uploadSingle(res, req, async (err: { message: any }) => {
+      if (err) return res.status(400).json({ success: false, err });
+      await userModel.create({ profilePicture: req.file.location });
+      console.log(req.file);
+      return res.status(200).json({ data: req.file });
+    });
+  }
 }
