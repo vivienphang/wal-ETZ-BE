@@ -38,8 +38,10 @@ export default class UserController extends BaseController {
   ) {
     super(model);
     this.redis = redis;
-    // don't know if this is best because technically this is async
-    this.redis.connect();
+  }
+
+  async init() {
+    await this.redis.connect();
   }
 
   async testRedis(_req: Request, res: Response) {
@@ -55,7 +57,7 @@ export default class UserController extends BaseController {
   }
 
   async testGetExchange(_req: Request, res: Response) {
-    const fromCurrency = "THB";
+    const fromCurrency = "TWD";
     let cache = await this.redis.hGetAll(fromCurrency);
     if (!Object.keys(cache).length) {
       console.log("cache miss");
@@ -66,7 +68,10 @@ export default class UserController extends BaseController {
       Object.keys(getRates.data.rates).forEach((key) => {
         this.redis.hSet(fromCurrency, key, getRates.data.rates[key]);
       });
-      this.redis.expire(fromCurrency, 86400);
+      this.redis.expireAt(
+        fromCurrency,
+        new Date(new Date().setUTCHours(24, 30, 0, 0))
+      );
       cache = await this.redis.hGetAll(fromCurrency);
     } else {
       console.log("cache hit");
@@ -216,6 +221,9 @@ export default class UserController extends BaseController {
       console.log(exchangeRate);
       if (!Object.keys(exchangeRate).length) {
         console.log("cache miss");
+        const nextUTCHalfPastMidnight = new Date(
+          new Date().setUTCHours(24, 30, 0, 0)
+        );
         const currencyListString: string = currencyList.join();
         const getRates = await axios.get(
           `${process.env.EXCHANGE_RATE_API}?base=${fromCurrency}&symbols=${currencyListString}`
@@ -223,7 +231,7 @@ export default class UserController extends BaseController {
         Object.keys(getRates.data.rates).forEach((key) => {
           this.redis.hSet(fromCurrency, key, getRates.data.rates[key]);
         });
-        this.redis.expire(fromCurrency, 86400);
+        this.redis.expireAt(fromCurrency, nextUTCHalfPastMidnight);
         exchangeRate = await this.redis.hGetAll(fromCurrency);
       } else {
         console.log("cache hit");

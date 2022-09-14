@@ -90,8 +90,10 @@ app.use("/users", userRoutes);
 app.use("/accounts", accountsRoutes);
 app.use("/records", recordsRoutes);
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`app is listening at port ${PORT}`);
+userController.init().then(() => {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`app is listening at port ${PORT}`);
+    });
   });
 });
