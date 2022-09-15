@@ -15,7 +15,7 @@ import responseStatus from "./responseStatus";
 import { JWTMiddlewareRequest, JWTRequest } from "../types/jwtRequestInterface";
 import { payloadInterface } from "../types/jwtPayload";
 import { UsersAttributes } from "../types/userInterface";
-import currencyList from "../model/currencyList";
+import currencyList from "../constants/currencyList";
 
 const {
   CREATED_USER,
