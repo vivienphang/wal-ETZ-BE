@@ -1,5 +1,4 @@
 import { Schema } from "mongoose";
-import { FriendAttributes } from "./friendInterface";
 
 export interface UsersAttributes {
   _id?: Schema.Types.ObjectId;
@@ -10,8 +9,5 @@ export interface UsersAttributes {
   password?: string;
   profilePicture?: string;
   defaultCurrency: string;
-  friends?: Array<FriendAttributes>;
-  friendRequest?: Array<FriendAttributes>;
-  receivedRequest?: Array<FriendAttributes>;
   accounts?: Schema.Types.ObjectId[];
 }
