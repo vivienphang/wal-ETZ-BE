@@ -9,6 +9,12 @@ const router: Router = express.Router();
 
 export default class UsersRoutes extends BaseRoutes {
   routes() {
+    router.get("/testRedis", this.controller.testRedis.bind(this.controller));
+    router.get(
+      "/testGetExchange",
+      this.controller.testGetExchange.bind(this.controller)
+    );
+
     /* no auth routes */
     router.post("/signup", this.controller.signUp.bind(this.controller));
     router.post("/login", this.controller.logIn.bind(this.controller));

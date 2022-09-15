@@ -35,7 +35,7 @@ export default class AccountsController extends BaseController {
         amount: Number(amount),
         isExpense: false,
         recordName: "Initializing Account",
-        recordCategory: "Misc.",
+        recordCategory: "Init. Account",
         recordDate: new Date(),
       });
     } catch (err) {
@@ -83,7 +83,7 @@ export default class AccountsController extends BaseController {
         amount: Number(amount),
         isExpense: false,
         recordName: "Initializing Account",
-        recordCategory: "Misc.",
+        recordCategory: "Init. Account",
         recordDate: new Date(),
       });
     } catch (err) {

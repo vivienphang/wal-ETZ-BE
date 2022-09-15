@@ -20,6 +20,8 @@ import AuthRoutes from "./routes/authRoutes";
 import authenticateJWT from "./middleware/authMiddleware";
 import initPassport from "./authentication/initPassport";
 
+import redisConfig from "./redis/redisConfig";
+
 require("dotenv").config();
 
 const app: express.Application = express();
@@ -36,7 +38,10 @@ app.use(
 );
 initPassport(app);
 
-const userController: UserController = new UserController(userModel);
+const userController: UserController = new UserController(
+  userModel,
+  redisConfig
+);
 const userRoutes: express.Router = new UserRoutes(
   userController,
   authenticateJWT
@@ -85,8 +90,10 @@ app.use("/users", userRoutes);
 app.use("/accounts", accountsRoutes);
 app.use("/records", recordsRoutes);
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`app is listening at port ${PORT}`);
+userController.init().then(() => {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`app is listening at port ${PORT}`);
+    });
   });
 });

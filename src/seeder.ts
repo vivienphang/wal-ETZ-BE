@@ -4,30 +4,18 @@ import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 import connectDB from "./config/config";
 import { userModel, recordsModel, accountsModel } from "./model/model";
+import currencyList from "./constants/currencyList";
+import categoryList from "./constants/categoryList";
 
 require("dotenv").config();
 
-const currencyList = [
-  "SGD",
-  "MYR",
-  "IDR",
-  "THB",
-  "HKD",
-  "CNY",
-  "JPY",
-  "USD",
-  "AUD",
-  "VND",
-  "TWD",
-];
-
-const randomInitialCurrencyIndex = () => {
+const randomizeIndex = (arrLength: number) => {
   console.log("randomizing index");
-  return Math.floor(Math.random() * currencyList.length);
+  return Math.floor(Math.random() * arrLength);
 };
 
 connectDB().then(async () => {
-  const firstCurrencyIndex = randomInitialCurrencyIndex();
+  const firstCurrencyIndex = randomizeIndex(currencyList.length);
   let firstIndexFlag = true;
   const newUser = await userModel.create({
     username: faker.internet.userName(),
@@ -42,7 +30,7 @@ connectDB().then(async () => {
       amount: 50000,
       isExpense: false,
       recordName: "Initializing Account",
-      recordCategory: "Misc.",
+      recordCategory: "Init. Account",
       recordDate: new Date(),
     });
 
@@ -50,7 +38,9 @@ connectDB().then(async () => {
       accName: faker.word.noun(),
       accCurrency:
         currencyList[
-          firstIndexFlag ? firstCurrencyIndex : randomInitialCurrencyIndex()
+          firstIndexFlag
+            ? firstCurrencyIndex
+            : randomizeIndex(currencyList.length)
         ],
       accRecords: [initialRecord.id],
     });
@@ -64,7 +54,7 @@ connectDB().then(async () => {
         amount: Number(randomAmount),
         isExpense,
         recordName: faker.word.noun(),
-        recordCategory: "Misc.",
+        recordCategory: categoryList[randomizeIndex(categoryList.length)],
         recordDate: new Date(),
       });
       await accountsModel.findByIdAndUpdate(

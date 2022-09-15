@@ -1,14 +1,23 @@
-/* eslint-disable max-len */
-import { Request, Response } from "express";
+import axios from "axios";
 import bcrypt from "bcrypt";
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import aws from "aws-sdk";
 import fs from "fs";
+import { Model } from "mongoose";
+import {
+  RedisClientType,
+  RedisFunctions,
+  RedisModules,
+  RedisScripts,
+} from "redis";
+
 import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
 import { JWTMiddlewareRequest, JWTRequest } from "../types/jwtRequestInterface";
 import { payloadInterface } from "../types/jwtPayload";
 import { UsersAttributes } from "../types/userInterface";
+import currencyList from "../constants/currencyList";
 
 const {
   CREATED_USER,
@@ -27,6 +36,55 @@ const {
 } = responseStatus;
 
 export default class UserController extends BaseController {
+  public redis: RedisClientType<RedisModules, RedisFunctions, RedisScripts>;
+
+  constructor(
+    model: Model<UsersAttributes>,
+    redis: RedisClientType<RedisModules, RedisFunctions, RedisScripts>
+  ) {
+    super(model);
+    this.redis = redis;
+  }
+
+  async init() {
+    await this.redis.connect();
+  }
+
+  async testRedis(_req: Request, res: Response) {
+    this.redis.set("foo", "bar", { EX: 10 });
+    const standardKeyValue = await this.redis.get("foo");
+    this.redis.hSet("outerKey", "innerKey-one", "value-one");
+    this.redis.hSet("outerKey", "innerKey-one", "overwrite-value-one");
+    this.redis.hSet("outerKey", "innerKey-two", "value-two");
+    this.redis.hSet("outerKey", "innerKey-number", 1234);
+    this.redis.expire("outerKey", 100);
+    const standardHashValue = await this.redis.hGetAll("outerKey");
+    res.send({ standardKeyValue, standardHashValue });
+  }
+
+  async testGetExchange(_req: Request, res: Response) {
+    const fromCurrency = "TWD";
+    let cache = await this.redis.hGetAll(fromCurrency);
+    if (!Object.keys(cache).length) {
+      console.log("cache miss");
+      const currencyListString: string = currencyList.join();
+      const getRates = await axios.get(
+        `${process.env.EXCHANGE_RATE_API}?base=${fromCurrency}&symbols=${currencyListString}`
+      );
+      Object.keys(getRates.data.rates).forEach((key) => {
+        this.redis.hSet(fromCurrency, key, getRates.data.rates[key]);
+      });
+      this.redis.expireAt(
+        fromCurrency,
+        new Date(new Date().setUTCHours(24, 30, 0, 0))
+      );
+      cache = await this.redis.hGetAll(fromCurrency);
+    } else {
+      console.log("cache hit");
+    }
+    res.send(cache);
+  }
+
   /* non jwt routes */
   async signUp(req: Request, res: Response) {
     console.log("signing up new user");
@@ -154,15 +212,41 @@ export default class UserController extends BaseController {
           select: "-createdAt -updatedAt -__v",
         })
         .select("-password -createdAt -updatedAt -__v");
+      console.log(populatedUserData);
       if (!populatedUserData) {
         throw new Error("no user exist");
       }
     } catch (err) {
       return res.status(400).json({ status: POPULATE_FAIL });
     }
-    return res
-      .status(200)
-      .json({ status: POPULATE_SUCCESS, data: populatedUserData });
+    let exchangeRate: any = {};
+    const fromCurrency = populatedUserData.defaultCurrency;
+    console.log(typeof fromCurrency);
+    if (populatedUserData.defaultCurrency) {
+      exchangeRate = await this.redis.hGetAll(fromCurrency);
+      console.log(exchangeRate);
+      if (!Object.keys(exchangeRate).length) {
+        console.log("cache miss");
+        const nextUTCHalfPastMidnight = new Date(
+          new Date().setUTCHours(24, 30, 0, 0)
+        );
+        const currencyListString: string = currencyList.join();
+        const getRates = await axios.get(
+          `${process.env.EXCHANGE_RATE_API}?base=${fromCurrency}&symbols=${currencyListString}`
+        );
+        Object.keys(getRates.data.rates).forEach((key) => {
+          this.redis.hSet(fromCurrency, key, getRates.data.rates[key]);
+        });
+        this.redis.expireAt(fromCurrency, nextUTCHalfPastMidnight);
+        exchangeRate = await this.redis.hGetAll(fromCurrency);
+      } else {
+        console.log("cache hit");
+      }
+    }
+    return res.status(200).json({
+      status: POPULATE_SUCCESS,
+      data: { user: populatedUserData, exchangeRate },
+    });
   }
 
   async updateProfile(req: Request, res: Response) {
