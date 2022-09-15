@@ -2,6 +2,8 @@ import axios from "axios";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import aws from "aws-sdk";
+import fs from "fs";
 import { Model } from "mongoose";
 import {
   RedisClientType,
@@ -27,6 +29,10 @@ const {
   PASSWORD_MISMATCH,
   POPULATE_FAIL,
   POPULATE_SUCCESS,
+  UPDATE_PROFILE_FAILED,
+  UPDATE_PROFILE_SUCCESS,
+  UPDATE_PICTURE_FAILED,
+  UPDATE_PICTURE_SUCCESS,
 } = responseStatus;
 
 export default class UserController extends BaseController {
@@ -241,5 +247,73 @@ export default class UserController extends BaseController {
       status: POPULATE_SUCCESS,
       data: { user: populatedUserData, exchangeRate },
     });
+  }
+
+  async updateProfile(req: Request, res: Response) {
+    console.log("updating user details");
+    const { id, username, currency } = req.body;
+    console.log("from REQ,BODY:", req.body);
+    console.log("username:", username, "currency:", currency, id);
+    let updateProfile: UsersAttributes | null;
+    try {
+      updateProfile = await this.model
+        .findByIdAndUpdate(
+          id,
+          { username, defaultCurrency: currency },
+          { returnDocument: "after" }
+        )
+        .select("-password -createdAt -updatedAt -__v -accounts");
+      console.log(updateProfile);
+      if (!updateProfile) {
+        throw new Error("no user exist");
+      }
+    } catch (err) {
+      return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
+    }
+    return res
+      .status(200)
+      .json({ status: UPDATE_PROFILE_SUCCESS, data: updateProfile });
+  }
+
+  async updatePicture(req: Request, res: Response) {
+    const { id } = req.body;
+    console.log("THIS IS req.body:", req.body);
+    // Connecting to S3 bucket
+    const s3 = new aws.S3({
+      accessKeyId: process.env.S3_ACCESS_KEY,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+      region: process.env.S3_BUCKET_REGION,
+    });
+    try {
+      if (req.file === null) {
+        return res.status(400).json({ message: "Please choose another file." });
+      }
+      const { file } = req;
+      const fileStream: any = fs.readFileSync(file.path);
+      console.log("this is file.path:", file.path);
+      console.log("this is req.file", req.file);
+      console.log("this is req.file.originalname", req.file?.originalname);
+
+      const uploadedImage = await s3
+        .upload({
+          Bucket: process.env.BUCKET_NAME,
+          Key: file.originalname,
+          Body: fileStream,
+        })
+        .promise();
+      console.log("uploaded image:", uploadedImage);
+      const updateUserPicture = await this.model
+        .findByIdAndUpdate(
+          id,
+          { profilePicture: uploadedImage.Location },
+          { returnDocument: "after" }
+        )
+        .select("-password -createdAt -updatedAt -__v -accounts");
+      return res
+        .status(200)
+        .json({ status: UPDATE_PICTURE_SUCCESS, data: updateUserPicture });
+    } catch (err) {
+      return res.status(400).json({ status: UPDATE_PICTURE_FAILED });
+    }
   }
 }
