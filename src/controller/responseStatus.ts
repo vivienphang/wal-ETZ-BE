@@ -18,7 +18,9 @@ const responseStatus = {
   QUERY_COMPLETE: "query complete",
   SESSION_ERROR: "session error",
   UPDATE_PROFILE_FAILED: "failed to update user profile",
-  UPDATE_PROFILE_SUCCESS: "update user profile successful",
+  UPDATE_PROFILE_SUCCESS: "user profile successfully updated",
+  UPDATE_PICTURE_FAILED: "failed to upload picture",
+  UPDATE_PICTURE_SUCCESS: "picture successfully uploaded",
 };
 
 export default responseStatus;

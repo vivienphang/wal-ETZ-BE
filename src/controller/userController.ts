@@ -3,14 +3,12 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import aws from "aws-sdk";
-import multer from "multer";
-import multerS3 from "multer-s3";
+import fs from "fs";
 import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
 import { JWTMiddlewareRequest, JWTRequest } from "../types/jwtRequestInterface";
 import { payloadInterface } from "../types/jwtPayload";
 import { UsersAttributes } from "../types/userInterface";
-import { userModel } from "../model/model";
 
 const {
   CREATED_USER,
@@ -24,33 +22,10 @@ const {
   POPULATE_SUCCESS,
   UPDATE_PROFILE_FAILED,
   UPDATE_PROFILE_SUCCESS,
+  UPDATE_PICTURE_FAILED,
+  UPDATE_PICTURE_SUCCESS,
 } = responseStatus;
 
-// Connect to S3 bucket
-const s3 = new aws.S3({
-  accessKeyId: process.env.S3_ACCESS_KEY,
-  secretAccessKey: process.env.S3_SECRET_ACCESS,
-  region: process.env.S3_BUCKET_REGION,
-});
-
-const upload = (bucketName: string) =>
-  multer({
-    storage: multerS3({
-      s3,
-      bucket: bucketName, // "bucket-for-capstone",
-      metadata(
-        req: any,
-        file: { fieldName: any },
-        // eslint-disable-next-line no-unused-vars
-        cb: (arg0: null, arg1: { fieldName: any }) => void
-      ) {
-        cb(null, { fieldName: file.fieldName });
-      },
-      key(req, file, cb) {
-        cb(null, "image.jpeg"); // accepts 2 params, null and file name as image.jpeg
-      },
-    }),
-  });
 export default class UserController extends BaseController {
   /* non jwt routes */
   async signUp(req: Request, res: Response) {
@@ -217,13 +192,44 @@ export default class UserController extends BaseController {
   }
 
   async updatePicture(req: Request, res: Response) {
-    const uploadSingle = upload("bucket-for-capstone").single("image-upload");
-
-    uploadSingle(res, req, async (err: { message: any }) => {
-      if (err) return res.status(400).json({ success: false, err });
-      await userModel.create({ profilePicture: req.file.location });
-      console.log(req.file);
-      return res.status(200).json({ data: req.file });
+    const { id } = req.body;
+    console.log("THIS IS req.body:", req.body);
+    // Connecting to S3 bucket
+    const s3 = new aws.S3({
+      accessKeyId: process.env.S3_ACCESS_KEY,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+      region: process.env.S3_BUCKET_REGION,
     });
+    try {
+      if (req.file === null) {
+        return res.status(400).json({ message: "Please choose another file." });
+      }
+      const { file } = req;
+      const fileStream: any = fs.readFileSync(file.path);
+      console.log("this is file.path:", file.path);
+      console.log("this is req.file", req.file);
+      console.log("this is req.file.originalname", req.file?.originalname);
+
+      const uploadedImage = await s3
+        .upload({
+          Bucket: process.env.BUCKET_NAME,
+          Key: file.originalname,
+          Body: fileStream,
+        })
+        .promise();
+      console.log("uploaded image:", uploadedImage);
+      const updateUserPicture = await this.model
+        .findByIdAndUpdate(
+          id,
+          { profilePicture: uploadedImage.Location },
+          { returnDocument: "after" }
+        )
+        .select("-password -createdAt -updatedAt -__v -accounts");
+      return res
+        .status(200)
+        .json({ status: UPDATE_PICTURE_SUCCESS, data: updateUserPicture });
+    } catch (err) {
+      return res.status(400).json({ status: UPDATE_PICTURE_FAILED });
+    }
   }
 }

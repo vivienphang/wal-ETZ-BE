@@ -1,7 +1,10 @@
+/* eslint-disable import/no-import-module-exports */
+/* eslint-disable import/prefer-default-export */
 import multer from "multer";
 import multerS3 from "multer-s3";
 import aws from "aws-sdk";
 
+const bucketName = process.env.BUCKET_NAME;
 // Connect to S3 bucket
 const s3 = new aws.S3({
   accessKeyId: process.env.S3_ACCESS_KEY,
@@ -9,7 +12,21 @@ const s3 = new aws.S3({
   region: process.env.S3_BUCKET_REGION,
 });
 
-const upload = (bucketName: string) => {
+export async function generateUploadURL() {
+  // the name that is unique for each image
+  const imageName = Date.now().toString();
+
+  const params = {
+    Bucket: bucketName,
+    Key: imageName,
+    Expires: 60,
+  };
+
+  const uploadURL: string = await s3.getSignedUrlPromise("putObject", params);
+  return uploadURL;
+}
+
+const upload = (bucketName: any) => {
   multer({
     storage: multerS3({
       s3,
