@@ -21,6 +21,7 @@ export default class AccountsRoutes extends BaseRoutes {
       "/newAccount",
       this.controller.createNewAccount.bind(this.controller)
     );
+
     return router;
   }
 }
