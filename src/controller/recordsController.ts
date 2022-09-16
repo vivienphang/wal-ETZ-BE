@@ -8,8 +8,6 @@ import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
 
 const {
-  CREATE_RECORD_FAILED,
-  CREATE_ACCOUNT_FAILED,
   UPDATE_PICTURE_FAILED,
   UPDATE_PICTURE_SUCCESS,
   ADD_RECORD_SUCCEED,
@@ -186,12 +184,12 @@ export default class RecordsController extends BaseController {
         return res.status(400).json({ message: "Please choose another file." });
       }
       const { file } = req;
-      const fileStream: any = fs.readFileSync(file.path);
+      const fileStream: any = fs.readFileSync(file!.path);
 
       const uploadedImage = await s3
         .upload({
-          Bucket: process.env.BUCKET_NAME,
-          Key: file.originalname,
+          Bucket: String(process.env.BUCKET_NAME),
+          Key: file!.originalname,
           Body: fileStream,
         })
         .promise();
