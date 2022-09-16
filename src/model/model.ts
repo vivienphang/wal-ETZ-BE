@@ -3,7 +3,7 @@ import { AccountsAttributes } from "../types/accountsInterface";
 import { RecordsAttributes } from "../types/recordsInterface";
 import { UsersAttributes } from "../types/userInterface";
 import currencyList from "../constants/currencyList";
-import categoryList from "../constants/categoryList";
+import { allCategories } from "../constants/categoryList";
 
 const recordsSchema: Schema<RecordsAttributes> = new Schema<RecordsAttributes>(
   {
@@ -15,7 +15,7 @@ const recordsSchema: Schema<RecordsAttributes> = new Schema<RecordsAttributes>(
     isExpense: { type: Boolean, required: true },
     recordName: { type: String },
     recordComment: { type: String },
-    recordCategory: { type: String, required: true, enum: categoryList },
+    recordCategory: { type: String, required: true, enum: allCategories },
     recordPhoto: { type: String },
     recordDate: { type: Date },
   },

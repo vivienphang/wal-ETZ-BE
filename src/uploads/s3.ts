@@ -26,11 +26,11 @@ export async function generateUploadURL() {
   return uploadURL;
 }
 
-const upload = (bucketName: any) => {
+const upload = () => {
   multer({
     storage: multerS3({
       s3,
-      bucket: bucketName, // "bucket-for-capstone",
+      bucket: bucketName,
       metadata(
         req: any,
         file: { fieldName: any },
