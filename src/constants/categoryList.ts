@@ -1,10 +1,13 @@
-export default [
+export const incomeCategories = [
   "Wages",
   "Sales",
   "Passive Income",
   "Gambling",
   "Dividends",
   "Misc. Income",
+];
+
+export const expenseCategories = [
   "Housing",
   "Restaurants",
   "Groceries",
@@ -17,5 +20,12 @@ export default [
   "Tax",
   "Health & Beauty",
   "Misc. Expense",
-  "Init. Account",
+];
+
+export const inaccessibleCategories = ["Init. Account"];
+
+export const allCategories = [
+  ...incomeCategories,
+  ...expenseCategories,
+  ...inaccessibleCategories,
 ];

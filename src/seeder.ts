@@ -2,10 +2,11 @@
 /* eslint-disable no-await-in-loop */
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
+import { DateTime } from "luxon";
 import connectDB from "./config/config";
 import { userModel, recordsModel, accountsModel } from "./model/model";
 import currencyList from "./constants/currencyList";
-import categoryList from "./constants/categoryList";
+import { incomeCategories, expenseCategories } from "./constants/categoryList";
 
 require("dotenv").config();
 
@@ -26,12 +27,16 @@ connectDB().then(async () => {
   });
 
   for (let i = 0; i < 3; i += 1) {
+    const startingDate = DateTime.now()
+      .minus({ months: 4 - i })
+      .startOf("month")
+      .plus({ minutes: 5 });
     const initialRecord = await recordsModel.create({
-      amount: 50000,
+      amount: 5000,
       isExpense: false,
       recordName: "Initializing Account",
       recordCategory: "Init. Account",
-      recordDate: new Date(),
+      recordDate: startingDate,
     });
 
     const newAccount = await accountsModel.create({
@@ -54,8 +59,15 @@ connectDB().then(async () => {
         amount: Number(randomAmount),
         isExpense,
         recordName: faker.word.noun(),
-        recordCategory: categoryList[randomizeIndex(categoryList.length)],
-        recordDate: new Date(),
+        recordCategory: isExpense
+          ? expenseCategories[randomizeIndex(expenseCategories.length)]
+          : incomeCategories[randomizeIndex(incomeCategories.length)],
+        recordDate: startingDate.plus({
+          days: randomizeIndex(20),
+          hours: randomizeIndex(24),
+          minutes: randomizeIndex(60),
+          seconds: randomizeIndex(60),
+        }),
       });
       await accountsModel.findByIdAndUpdate(
         newAccount.id,

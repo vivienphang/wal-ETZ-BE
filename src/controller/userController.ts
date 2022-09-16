@@ -289,15 +289,15 @@ export default class UserController extends BaseController {
         return res.status(400).json({ message: "Please choose another file." });
       }
       const { file } = req;
-      const fileStream: any = fs.readFileSync(file.path);
-      console.log("this is file.path:", file.path);
+      const fileStream: any = fs.readFileSync(file!.path);
+      console.log("this is file.path:", file!.path);
       console.log("this is req.file", req.file);
       console.log("this is req.file.originalname", req.file?.originalname);
 
       const uploadedImage = await s3
         .upload({
-          Bucket: process.env.BUCKET_NAME,
-          Key: file.originalname,
+          Bucket: String(process.env.BUCKET_NAME),
+          Key: file!.originalname,
           Body: fileStream,
         })
         .promise();
