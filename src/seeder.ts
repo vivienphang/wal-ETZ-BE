@@ -11,7 +11,6 @@ import { incomeCategories, expenseCategories } from "./constants/categoryList";
 require("dotenv").config();
 
 const randomizeIndex = (arrLength: number) => {
-  console.log("randomizing index");
   return Math.floor(Math.random() * arrLength);
 };
 
@@ -83,20 +82,4 @@ connectDB().then(async () => {
       { returnDocument: "after" }
     );
   }
-  console.log("seeding done");
-
-  const userData = await userModel
-    .findById(newUser.id)
-    .populate({
-      path: "accounts",
-      populate: {
-        path: "accRecords",
-        select: "-createdAt -updatedAt -__v",
-        options: { sort: "-recordDate" },
-      },
-      select: "-createdAt -updatedAt -__v",
-    })
-    .select("-password -createdAt -updatedAt -__v");
-
-  console.log(userData);
 });
