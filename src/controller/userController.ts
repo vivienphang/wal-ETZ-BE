@@ -29,6 +29,7 @@ const {
   PASSWORD_MISMATCH,
   POPULATE_FAIL,
   POPULATE_SUCCESS,
+  REDIS_ERROR,
   UPDATE_PROFILE_FAILED,
   UPDATE_PROFILE_SUCCESS,
   UPDATE_PICTURE_FAILED,
@@ -48,41 +49,6 @@ export default class UserController extends BaseController {
 
   async init() {
     await this.redis.connect();
-  }
-
-  async testRedis(_req: Request, res: Response) {
-    this.redis.set("foo", "bar", { EX: 10 });
-    const standardKeyValue = await this.redis.get("foo");
-    this.redis.hSet("outerKey", "innerKey-one", "value-one");
-    this.redis.hSet("outerKey", "innerKey-one", "overwrite-value-one");
-    this.redis.hSet("outerKey", "innerKey-two", "value-two");
-    this.redis.hSet("outerKey", "innerKey-number", 1234);
-    this.redis.expire("outerKey", 100);
-    const standardHashValue = await this.redis.hGetAll("outerKey");
-    res.send({ standardKeyValue, standardHashValue });
-  }
-
-  async testGetExchange(_req: Request, res: Response) {
-    const fromCurrency = "TWD";
-    let cache = await this.redis.hGetAll(fromCurrency);
-    if (!Object.keys(cache).length) {
-      console.log("cache miss");
-      const currencyListString: string = currencyList.join();
-      const getRates = await axios.get(
-        `${process.env.EXCHANGE_RATE_API}?base=${fromCurrency}&symbols=${currencyListString}`
-      );
-      Object.keys(getRates.data.rates).forEach((key) => {
-        this.redis.hSet(fromCurrency, key, getRates.data.rates[key]);
-      });
-      this.redis.expireAt(
-        fromCurrency,
-        new Date(new Date().setUTCHours(24, 30, 0, 0))
-      );
-      cache = await this.redis.hGetAll(fromCurrency);
-    } else {
-      console.log("cache hit");
-    }
-    res.send(cache);
   }
 
   /* non jwt routes */
@@ -221,26 +187,25 @@ export default class UserController extends BaseController {
     }
     let exchangeRate: any = {};
     const fromCurrency = populatedUserData.defaultCurrency;
-    console.log(typeof fromCurrency);
     if (populatedUserData.defaultCurrency) {
-      exchangeRate = await this.redis.hGetAll(fromCurrency);
-      console.log(exchangeRate);
-      if (!Object.keys(exchangeRate).length) {
-        console.log("cache miss");
-        const nextUTCHalfPastMidnight = new Date(
-          new Date().setUTCHours(24, 30, 0, 0)
-        );
-        const currencyListString: string = currencyList.join();
-        const getRates = await axios.get(
-          `${process.env.EXCHANGE_RATE_API}?base=${fromCurrency}&symbols=${currencyListString}`
-        );
-        Object.keys(getRates.data.rates).forEach((key) => {
-          this.redis.hSet(fromCurrency, key, getRates.data.rates[key]);
-        });
-        this.redis.expireAt(fromCurrency, nextUTCHalfPastMidnight);
+      try {
         exchangeRate = await this.redis.hGetAll(fromCurrency);
-      } else {
-        console.log("cache hit");
+        if (!Object.keys(exchangeRate).length) {
+          const nextUTCHalfPastMidnight = new Date(
+            new Date().setUTCHours(24, 30, 0, 0)
+          );
+          const currencyListString: string = currencyList.join();
+          const getRates = await axios.get(
+            `${process.env.EXCHANGE_RATE_API}?base=${fromCurrency}&symbols=${currencyListString}`
+          );
+          Object.keys(getRates.data.rates).forEach((key) => {
+            this.redis.hSet(fromCurrency, key, getRates.data.rates[key]);
+          });
+          this.redis.expireAt(fromCurrency, nextUTCHalfPastMidnight);
+          exchangeRate = await this.redis.hGetAll(fromCurrency);
+        }
+      } catch (err) {
+        return res.status(400).json({ status: REDIS_ERROR });
       }
     }
     return res.status(200).json({
@@ -270,9 +235,32 @@ export default class UserController extends BaseController {
     } catch (err) {
       return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
     }
-    return res
-      .status(200)
-      .json({ status: UPDATE_PROFILE_SUCCESS, data: updateProfile });
+
+    let exchangeRate: any = {};
+    try {
+      exchangeRate = await this.redis.hGetAll(currency);
+      if (!Object.keys(exchangeRate).length) {
+        const nextUTCHalfPastMidnight = new Date(
+          new Date().setUTCHours(24, 30, 0, 0)
+        );
+        const currencyListString: string = currencyList.join();
+        const getRates = await axios.get(
+          `${process.env.EXCHANGE_RATE_API}?base=${currency}&symbols=${currencyListString}`
+        );
+        Object.keys(getRates.data.rates).forEach((key) => {
+          this.redis.hSet(currency, key, getRates.data.rates[key]);
+        });
+        this.redis.expireAt(currency, nextUTCHalfPastMidnight);
+        exchangeRate = await this.redis.hGetAll(currency);
+      }
+    } catch (err) {
+      return res.status(400).json({ status: REDIS_ERROR });
+    }
+
+    return res.status(200).json({
+      status: UPDATE_PROFILE_SUCCESS,
+      data: { user: updateProfile, exchangeRate },
+    });
   }
 
   async updatePicture(req: Request, res: Response) {

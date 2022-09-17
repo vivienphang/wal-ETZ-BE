@@ -6,8 +6,12 @@ import BaseController from "./baseController";
 import { UsersAttributes } from "../types/userInterface";
 import responseStatus from "./responseStatus";
 
-const { APPEND_TO_USER_FAILED, CREATE_ACCOUNT_FAILED, CREATE_RECORD_FAILED } =
-  responseStatus;
+const {
+  APPEND_TO_USER_FAILED,
+  CREATE_ACCOUNT_FAILED,
+  CREATE_ACCOUNT_SUCCESS,
+  CREATE_RECORD_FAILED,
+} = responseStatus;
 
 export default class AccountsController extends BaseController {
   public records: Model<RecordsAttributes>;
@@ -25,9 +29,7 @@ export default class AccountsController extends BaseController {
   }
 
   async createInitialAccount(req: Request, res: Response) {
-    console.log("creating first account");
     const { id, accName, accCurrency, balance: amount } = req.body;
-    let userData: UsersAttributes | null;
     let newAccount: AccountsAttributes;
     let newRecord: RecordsAttributes;
     try {
@@ -55,7 +57,7 @@ export default class AccountsController extends BaseController {
     }
 
     try {
-      userData = await this.users.findByIdAndUpdate(
+      await this.users.findByIdAndUpdate(
         id,
         {
           $push: { accounts: newAccount.id },
@@ -69,11 +71,10 @@ export default class AccountsController extends BaseController {
       await this.model.findByIdAndDelete(newAccount.id);
       return res.status(400).json({ status: APPEND_TO_USER_FAILED });
     }
-    return res.status(200).json({ newRecord, newAccount, userData });
+    return res.status(200).json({ status: CREATE_ACCOUNT_SUCCESS });
   }
 
   async createNewAccount(req: Request, res: Response) {
-    console.log("creating new account");
     const { id, accName, accCurrency, balance: amount } = req.body;
     let userData: UsersAttributes | null;
     let newAccount: AccountsAttributes;
@@ -103,19 +104,32 @@ export default class AccountsController extends BaseController {
     }
 
     try {
-      userData = await this.users.findByIdAndUpdate(
-        id,
-        {
-          $push: { accounts: newAccount.id },
-        },
-        { returnDocument: "after" }
-      );
+      userData = await this.users
+        .findByIdAndUpdate(
+          id,
+          {
+            $push: { accounts: newAccount.id },
+          },
+          { returnDocument: "after" }
+        )
+        .populate({
+          path: "accounts",
+          populate: {
+            path: "accRecords",
+            select: "-createdAt -updatedAt -__v",
+            options: { sort: "-recordDate" },
+          },
+          select: "-createdAt -updatedAt -__v",
+        })
+        .select("-password -createdAt -updatedAt -__v");
     } catch (err) {
       // deleting record and account if create failed
       await this.records.findByIdAndDelete(newRecord.id);
       await this.model.findByIdAndDelete(newAccount.id);
       return res.status(400).json({ status: APPEND_TO_USER_FAILED });
     }
-    return res.status(200).json({ newRecord, newAccount, userData });
+    return res
+      .status(200)
+      .json({ status: CREATE_ACCOUNT_SUCCESS, data: userData });
   }
 }

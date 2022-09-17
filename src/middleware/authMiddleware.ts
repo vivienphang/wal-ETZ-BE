@@ -10,28 +10,26 @@ const authenticateJWT: RequestHandler = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log("checking JWT");
   try {
     const authToken: string | undefined = req
       .header("Authorization")!
       .replace("Bearer ", "");
     if (!authToken) {
-      res.status(401).json({ message: NO_JWT });
+      res.status(401).json({ status: NO_JWT });
       return;
     }
     const verifiedToken: string | jwt.JwtPayload = jwt.verify(
       authToken as string,
       process.env.JWT_SECRET as string
     );
-    console.log("token verified: ", verifiedToken);
     req.body.id = typeof verifiedToken === "string" ? "" : verifiedToken.id;
   } catch (err) {
     console.log(err);
     if (err instanceof jwt.TokenExpiredError) {
-      res.status(401).json({ message: EXPIRED_JWT });
+      res.status(401).json({ status: EXPIRED_JWT });
       return;
     }
-    res.status(400).json({ message: BAD_JWT });
+    res.status(400).json({ status: BAD_JWT });
     return;
   }
   next();

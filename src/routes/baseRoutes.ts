@@ -5,11 +5,9 @@ import UserController from "../controller/userController";
 import RecordsController from "../controller/recordsController";
 
 export default class BaseRoutes {
-  // dunno why this dont work
-  // public controller: UserController | AccountsController;
   public controller: any;
 
-  public JWTMiddleware: any;
+  public JWTMiddleware: RequestHandler;
 
   constructor(
     controller:
