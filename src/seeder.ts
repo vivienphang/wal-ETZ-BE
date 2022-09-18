@@ -82,4 +82,6 @@ connectDB().then(async () => {
       { returnDocument: "after" }
     );
   }
+
+  console.log("seeding done", await userModel.findById(newUser.id));
 });
