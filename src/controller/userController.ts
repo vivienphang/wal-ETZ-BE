@@ -235,7 +235,6 @@ export default class UserController extends BaseController {
     } catch (err) {
       return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
     }
-
     let exchangeRate: any = {};
     try {
       exchangeRate = await this.redis.hGetAll(currency);
