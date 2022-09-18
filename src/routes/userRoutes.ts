@@ -57,6 +57,10 @@ export default class UsersRoutes extends BaseRoutes {
       this.controller.updateCurrencyOnly.bind(this.controller)
     );
     router.post(
+      "/updateProfile",
+      this.controller.updateProfile.bind(this.controller)
+    );
+    router.post(
       "/updatePicture",
       multerUpload.single("file"),
       this.JWTMiddleware,
