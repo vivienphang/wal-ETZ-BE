@@ -214,10 +214,80 @@ export default class UserController extends BaseController {
     });
   }
 
+  // update username only
+  async updateUsernameOnly(req: Request, res: Response) {
+    console.log("updating USERNAME ONLY");
+    const { id, username } = req.body;
+    console.log("username:", username, "id:", id);
+    let updateUsernameOnly: UsersAttributes | null;
+    try {
+      updateUsernameOnly = await this.model
+        .findByIdAndUpdate(id, { username }, { returnDocument: "after" })
+        .select("-password -createdAt -updatedAt -__v -accounts");
+      console.log(updateUsernameOnly);
+      if (!username) {
+        throw new Error("Username cannot be empty!");
+      }
+    } catch (err) {
+      return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
+    }
+    return res.status(200).json({
+      status: UPDATE_PROFILE_SUCCESS,
+      data: { updateUsernameOnly },
+    });
+  }
+
+  // update currency only
+  async updateCurrencyOnly(req: Request, res: Response) {
+    console.log("updating CURRENCY ONLY");
+    const { id, defaultCurrency } = req.body;
+    console.log("id:", id, "defaultCurrency:", defaultCurrency);
+    let updateCurrencyOnly: UsersAttributes | null;
+    try {
+      updateCurrencyOnly = await this.model
+        .findByIdAndUpdate(
+          id,
+          {
+            defaultCurrency,
+          },
+          { returnDocument: "after" }
+        )
+        .select("-password -createdAt -updatedAt -__v -accounts");
+      console.log(updateCurrencyOnly);
+    } catch (err) {
+      return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
+    }
+    let exchangeRate: any = {};
+    try {
+      exchangeRate = await this.redis.hGetAll(defaultCurrency);
+      if (!Object.keys(exchangeRate).length) {
+        const nextUTCHalfPastMidnight = new Date(
+          new Date().setUTCHours(24, 30, 0, 0)
+        );
+        const currencyListString: string = currencyList.join();
+        const getRates = await axios.get(
+          `${process.env.EXCHANGE_RATE_API}?base=${defaultCurrency}&symbols=${currencyListString}`
+        );
+        Object.keys(getRates.data.rates).forEach((key) => {
+          this.redis.hSet(defaultCurrency, key, getRates.data.rates[key]);
+        });
+        this.redis.expireAt(defaultCurrency, nextUTCHalfPastMidnight);
+        exchangeRate = await this.redis.hGetAll(defaultCurrency);
+      }
+    } catch (err) {
+      return res.status(400).json({ status: REDIS_ERROR });
+    }
+
+    return res.status(200).json({
+      status: UPDATE_PROFILE_SUCCESS,
+      data: { updateCurrencyOnly, exchangeRate },
+    });
+  }
+
+  // update username and currency
   async updateProfile(req: Request, res: Response) {
     console.log("updating user details");
     const { id, username, currency } = req.body;
-    console.log("from REQ,BODY:", req.body);
     console.log("username:", username, "currency:", currency, id);
     let updateProfile: UsersAttributes | null;
     try {
