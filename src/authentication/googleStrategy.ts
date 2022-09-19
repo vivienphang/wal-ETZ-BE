@@ -16,14 +16,11 @@ const googleStrategy = new GoogleStrategy(
     callbackURL: "/auth/google/callback",
   },
   async (
-    accessToken: string,
-    refreshToken: string,
+    _accessToken: string,
+    _refreshToken: string,
     profile: GoogleOAuth.Profile,
     done: GoogleOAuth.VerifyCallback
   ) => {
-    console.log("this is profile:", profile);
-    console.log("this is access token:", accessToken);
-    console.log("this is refresh token:", refreshToken);
     let userResult;
 
     const { id, displayName, emails, photos } = profile;
@@ -35,7 +32,6 @@ const googleStrategy = new GoogleStrategy(
       { googleID: id },
       { returnDocument: "after" }
     );
-    console.log("USER?", userResult);
     if (!userResult) {
       userResult = await userModel.create({
         googleID: id,
@@ -44,8 +40,6 @@ const googleStrategy = new GoogleStrategy(
         profilePicture: photos ? photos[0].value : null,
       });
     }
-
-    console.log("this is user result:", userResult);
     done(null, userResult);
   }
 );

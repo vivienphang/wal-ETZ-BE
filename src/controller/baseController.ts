@@ -15,21 +15,16 @@ export default class BaseController {
   }
 
   async getAll(req: Request, res: Response) {
-    console.log("getting all data");
     let results: object;
     try {
       results = await this.model.find();
     } catch (err) {
-      console.log(err);
       return res.status(400).json({ status: BAD_CONNECTION });
     }
     return res.status(200).json({ status: QUERY_COMPLETE, data: results });
   }
 
   async getOne(req: Request, res: Response) {
-    console.log("getting one data");
-    console.log("params: ", req.params);
-    console.log("body: ", req.body);
     const { params, body } = req;
     let results: object | null;
     try {
@@ -47,8 +42,6 @@ export default class BaseController {
   }
 
   async createOne(req: Request, res: Response) {
-    console.log("creating one entry");
-    console.log("body: ", req.body);
     const { body } = req;
     let newEntry;
     try {

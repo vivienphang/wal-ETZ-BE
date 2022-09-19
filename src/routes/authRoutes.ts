@@ -6,8 +6,6 @@ const router: Router = express.Router();
 
 export default class AuthRoutes extends BaseRoutes {
   routes() {
-    // router.get("/failed", this.controller.loginFailed.bind(this.controller));
-
     router.get(
       "/google",
       passport.authenticate("google", {

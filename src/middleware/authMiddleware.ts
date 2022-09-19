@@ -24,7 +24,6 @@ const authenticateJWT: RequestHandler = async (
     );
     req.body.id = typeof verifiedToken === "string" ? "" : verifiedToken.id;
   } catch (err) {
-    console.log(err);
     if (err instanceof jwt.TokenExpiredError) {
       res.status(401).json({ status: EXPIRED_JWT });
       return;
