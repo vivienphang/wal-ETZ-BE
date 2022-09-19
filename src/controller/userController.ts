@@ -53,7 +53,6 @@ export default class UserController extends BaseController {
 
   /* non jwt routes */
   async signUp(req: Request, res: Response) {
-    console.log("signing up new user");
     const { username, email, password } = req.body;
     const hashedPassword: string = await bcrypt.hash(
       password,
@@ -81,7 +80,6 @@ export default class UserController extends BaseController {
   }
 
   async logIn(req: Request, res: Response) {
-    console.log("logging in user");
     const { loginCredentials, password } = req.body;
     let checkUser: UsersAttributes | null;
     try {
@@ -113,8 +111,6 @@ export default class UserController extends BaseController {
 
   // extracting request.user details
   async getUserDetails(req: JWTRequest, res: Response) {
-    console.log("running get user details");
-    console.log(this.model);
     if (req.user) {
       const payload: payloadInterface = {
         id: req.user.id,
@@ -129,8 +125,6 @@ export default class UserController extends BaseController {
 
   /* jwt routes */
   JWTRefresh(req: JWTMiddlewareRequest, res: Response) {
-    console.log("checking if jwt is present");
-    console.log(this.model);
     const { id } = req.body;
     const payload: payloadInterface = {
       id,
@@ -143,7 +137,6 @@ export default class UserController extends BaseController {
   }
 
   async populateAccounts(req: JWTMiddlewareRequest, res: Response) {
-    console.log("populating accounts");
     const { id } = req.body;
     let populatedUserData: any;
     try {
@@ -162,7 +155,6 @@ export default class UserController extends BaseController {
   }
 
   async populateRecords(req: JWTMiddlewareRequest, res: Response) {
-    console.log("populating accounts and records");
     const { id } = req.body;
     let populatedUserData: any;
     try {
@@ -178,7 +170,6 @@ export default class UserController extends BaseController {
           select: "-createdAt -updatedAt -__v",
         })
         .select("-password -createdAt -updatedAt -__v");
-      console.log(populatedUserData);
       if (!populatedUserData) {
         throw new Error("no user exist");
       }
@@ -216,15 +207,12 @@ export default class UserController extends BaseController {
 
   // update username only
   async updateUsernameOnly(req: Request, res: Response) {
-    console.log("updating USERNAME ONLY");
     const { id, username } = req.body;
-    console.log("username:", username, "id:", id);
     let updateUsernameOnly: UsersAttributes | null;
     try {
       updateUsernameOnly = await this.model
         .findByIdAndUpdate(id, { username }, { returnDocument: "after" })
         .select("-password -createdAt -updatedAt -__v -accounts");
-      console.log(updateUsernameOnly);
       if (!username) {
         throw new Error("Username cannot be empty!");
       }
@@ -239,9 +227,7 @@ export default class UserController extends BaseController {
 
   // update currency only
   async updateCurrencyOnly(req: Request, res: Response) {
-    console.log("updating CURRENCY ONLY");
     const { id, defaultCurrency } = req.body;
-    console.log("id:", id, "defaultCurrency:", defaultCurrency);
     let updateCurrencyOnly: UsersAttributes | null;
     try {
       updateCurrencyOnly = await this.model
@@ -253,7 +239,6 @@ export default class UserController extends BaseController {
           { returnDocument: "after" }
         )
         .select("-password -createdAt -updatedAt -__v -accounts");
-      console.log(updateCurrencyOnly);
     } catch (err) {
       return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
     }
@@ -286,9 +271,7 @@ export default class UserController extends BaseController {
 
   // update username and currency
   async updateProfile(req: Request, res: Response) {
-    console.log("updating user details");
     const { id, username, currency } = req.body;
-    console.log("username:", username, "currency:", currency, id);
     let updateProfile: UsersAttributes | null;
     try {
       updateProfile = await this.model
@@ -298,7 +281,6 @@ export default class UserController extends BaseController {
           { returnDocument: "after" }
         )
         .select("-password -createdAt -updatedAt -__v -accounts");
-      console.log(updateProfile);
       if (!updateProfile) {
         throw new Error("no user exist");
       }
@@ -334,7 +316,6 @@ export default class UserController extends BaseController {
 
   async updatePicture(req: Request, res: Response) {
     const { id } = req.body;
-    console.log("THIS IS req.body:", req.body);
     // Connecting to S3 bucket
     const s3 = new aws.S3({
       accessKeyId: process.env.S3_ACCESS_KEY,
@@ -347,9 +328,6 @@ export default class UserController extends BaseController {
       }
       const { file } = req;
       const fileStream: any = fs.readFileSync(file!.path);
-      console.log("this is file.path:", file!.path);
-      console.log("this is req.file", req.file);
-      console.log("this is req.file.originalname", req.file?.originalname);
 
       const uploadedImage = await s3
         .upload({
@@ -358,7 +336,6 @@ export default class UserController extends BaseController {
           Body: fileStream,
         })
         .promise();
-      console.log("uploaded image:", uploadedImage);
       const updateUserPicture = await this.model
         .findByIdAndUpdate(
           id,

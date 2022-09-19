@@ -5,12 +5,6 @@ const router: Router = express.Router();
 
 export default class AccountsRoutes extends BaseRoutes {
   routes() {
-    /* no auth routes */
-    router.post(
-      "/newTest",
-      this.controller.createNewAccount.bind(this.controller)
-    );
-
     /* auth routes */
     router.use(this.JWTMiddleware);
     router.post(

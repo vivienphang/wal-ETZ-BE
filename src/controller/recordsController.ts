@@ -54,7 +54,6 @@ export default class RecordsController extends BaseController {
         recordComment,
       });
     } catch (err) {
-      console.log(err);
       return res.status(400).json({ status: CREATE_RECORD_FAILED });
     }
     try {
