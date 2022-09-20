@@ -1,7 +1,8 @@
+import { Application } from "express";
 import passport from "passport";
 import googleStrategy from "./googleStrategy";
 
-const initPassport = (app: any) => {
+const initPassport = (app: Application) => {
   googleStrategy(passport);
 
   app.use(passport.initialize());

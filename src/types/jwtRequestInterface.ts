@@ -7,7 +7,3 @@ interface UserDetails {
 export interface JWTRequest extends Request {
   user?: UserDetails;
 }
-
-export interface JWTMiddlewareRequest extends Request {
-  jwt?: UserDetails;
-}

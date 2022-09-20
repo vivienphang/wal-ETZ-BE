@@ -1,12 +1,11 @@
-import { NextFunction, RequestHandler, Response } from "express";
+import { NextFunction, RequestHandler, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { JWTMiddlewareRequest } from "../types/jwtRequestInterface";
 import responseStatus from "./responseStatus";
 
 const { BAD_JWT, EXPIRED_JWT, NO_JWT } = responseStatus;
 
 const authenticateJWT: RequestHandler = async (
-  req: JWTMiddlewareRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {

@@ -1,3 +1,4 @@
+import { PassportStatic } from "passport";
 import GoogleOAuth, {
   Strategy as GoogleStrategy,
 } from "passport-google-oauth20";
@@ -44,6 +45,6 @@ const googleStrategy = new GoogleStrategy(
   }
 );
 
-export default (passport: any) => {
+export default (passport: PassportStatic) => {
   passport.use(googleStrategy);
 };
