@@ -14,18 +14,19 @@ import {
 
 import BaseController from "./baseController";
 import responseStatus from "./responseStatus";
-import { JWTMiddlewareRequest, JWTRequest } from "../types/jwtRequestInterface";
+import { JWTRequest } from "../types/jwtRequestInterface";
 import { payloadInterface } from "../types/jwtPayload";
 import { UsersAttributes } from "../types/userInterface";
 import currencyList from "../constants/currencyList";
+import { exchangeRateInterface } from "../types/exchangeRateInterface";
 
 const {
   CREATED_USER,
   CREATE_USER_FAILED,
+  FILE_NOT_FOUND,
   JWT_REFRESHED,
   JWT_NO_USER,
   LOGGED_IN,
-  USER_NOT_FOUND,
   PASSWORD_MISMATCH,
   POPULATE_FAIL,
   POPULATE_SUCCESS,
@@ -34,6 +35,7 @@ const {
   UPDATE_PROFILE_SUCCESS,
   UPDATE_PICTURE_FAILED,
   UPDATE_PICTURE_SUCCESS,
+  USER_NOT_FOUND,
 } = responseStatus;
 
 export default class UserController extends BaseController {
@@ -124,7 +126,7 @@ export default class UserController extends BaseController {
   }
 
   /* jwt routes */
-  JWTRefresh(req: JWTMiddlewareRequest, res: Response) {
+  JWTRefresh(req: Request, res: Response) {
     const { id } = req.body;
     const payload: payloadInterface = {
       id,
@@ -136,7 +138,7 @@ export default class UserController extends BaseController {
     res.status(200).json({ status: JWT_REFRESHED, token });
   }
 
-  async populateAccounts(req: JWTMiddlewareRequest, res: Response) {
+  async populateAccounts(req: Request, res: Response) {
     const { id } = req.body;
     let populatedUserData: any;
     try {
@@ -154,7 +156,7 @@ export default class UserController extends BaseController {
       .json({ status: POPULATE_SUCCESS, data: populatedUserData });
   }
 
-  async populateRecords(req: JWTMiddlewareRequest, res: Response) {
+  async populateRecords(req: Request, res: Response) {
     const { id } = req.body;
     let populatedUserData: any;
     try {
@@ -176,7 +178,7 @@ export default class UserController extends BaseController {
     } catch (err) {
       return res.status(400).json({ status: POPULATE_FAIL });
     }
-    let exchangeRate: any = {};
+    let exchangeRate: exchangeRateInterface = {};
     const fromCurrency = populatedUserData.defaultCurrency;
     if (populatedUserData.defaultCurrency) {
       try {
@@ -193,7 +195,7 @@ export default class UserController extends BaseController {
             this.redis.hSet(fromCurrency, key, getRates.data.rates[key]);
           });
           this.redis.expireAt(fromCurrency, nextUTCHalfPastMidnight);
-          exchangeRate = await this.redis.hGetAll(fromCurrency);
+          exchangeRate = getRates.data.rates;
         }
       } catch (err) {
         return res.status(400).json({ status: REDIS_ERROR });
@@ -242,7 +244,7 @@ export default class UserController extends BaseController {
     } catch (err) {
       return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
     }
-    let exchangeRate: any = {};
+    let exchangeRate: exchangeRateInterface = {};
     try {
       exchangeRate = await this.redis.hGetAll(defaultCurrency);
       if (!Object.keys(exchangeRate).length) {
@@ -257,7 +259,7 @@ export default class UserController extends BaseController {
           this.redis.hSet(defaultCurrency, key, getRates.data.rates[key]);
         });
         this.redis.expireAt(defaultCurrency, nextUTCHalfPastMidnight);
-        exchangeRate = await this.redis.hGetAll(defaultCurrency);
+        exchangeRate = getRates.data.rates;
       }
     } catch (err) {
       return res.status(400).json({ status: REDIS_ERROR });
@@ -287,7 +289,7 @@ export default class UserController extends BaseController {
     } catch (err) {
       return res.status(400).json({ status: UPDATE_PROFILE_FAILED });
     }
-    let exchangeRate: any = {};
+    let exchangeRate: exchangeRateInterface = {};
     try {
       exchangeRate = await this.redis.hGetAll(currency);
       if (!Object.keys(exchangeRate).length) {
@@ -302,7 +304,7 @@ export default class UserController extends BaseController {
           this.redis.hSet(currency, key, getRates.data.rates[key]);
         });
         this.redis.expireAt(currency, nextUTCHalfPastMidnight);
-        exchangeRate = await this.redis.hGetAll(currency);
+        exchangeRate = getRates.data.rates;
       }
     } catch (err) {
       return res.status(400).json({ status: REDIS_ERROR });
@@ -324,7 +326,7 @@ export default class UserController extends BaseController {
     });
     try {
       if (req.file === null) {
-        return res.status(400).json({ message: "Please choose another file." });
+        return res.status(400).json({ status: FILE_NOT_FOUND });
       }
       const { file } = req;
       const fileStream: any = fs.readFileSync(file!.path);

@@ -81,9 +81,6 @@ app.use(
     origin: process.env.FRONTEND_URL,
   })
 );
-console.log(process.env.FRONT_END_URL);
-
-// passport.authenticate("google");
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
