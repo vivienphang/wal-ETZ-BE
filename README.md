@@ -5,6 +5,12 @@ Aureus is a full stack app that helps users with their daily budgeting by tracki
 
 This app is best viewed in mobile version.
 
+## Tech Stack
+
+**Client:** TypeScript, React, React Hooks (useContext + useReducer in replacement of Redux), Chakra UI, Luxon, SwiperJS, and ChartsJS
+
+**Server:** Node, Express, TypeScript, MongoDB, Mongoose, Redis, AWS S3, PassportJS, JWT and Bcrypt
+
 
 
 ## Contributors
