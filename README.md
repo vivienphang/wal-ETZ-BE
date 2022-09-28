@@ -5,6 +5,12 @@ Aureus is a full stack app that helps users with their daily budgeting by tracki
 
 This app is best viewed in mobile version.
 
+> Note: This is the backend repo. Frontend repo can be found [here.](https://github.com/vivienphang/wal-ETZ-FE)
+
+## App Demo
+
+Link to Youtube can be found [here.](https://youtu.be/YyAHUT4NbMI)
+
 ## Tech Stack
 
 **Client:** TypeScript, React, React Hooks (useContext + useReducer in replacement of Redux), Chakra UI, Luxon, SwiperJS, and ChartsJS
